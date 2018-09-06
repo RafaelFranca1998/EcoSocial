@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "447583385381",
+    "firebase_url": "https://ecossocial-2c0dc.firebaseio.com",
+    "project_id": "ecossocial-2c0dc",
+    "storage_bucket": "ecossocial-2c0dc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:447583385381:android:634c78cc8cdfcc89",
+        "android_client_info": {
+          "package_name": "com.example.rafael_cruz.prototipo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "447583385381-s8jm5a4u10f8t3qh47a1hmup4me9iu2a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rafael_cruz.prototipo",
+            "certificate_hash": "436acaf5c0070286b3e47ea6eba327cb7cabe20b"
+          }
+        },
+        {
+          "client_id": "447583385381-q31nump2363tclumothplko0qqv6g5c0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoIBoGRG3JdTrm_y2sasGAyBDwjjhTZ34"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "447583385381-q31nump2363tclumothplko0qqv6g5c0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

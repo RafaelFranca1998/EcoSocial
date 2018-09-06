@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <color name="Violeta">#3F51B5</color>
+    <color name="Azul">#303F9F</color>
+    <color name="Rosinha">#FF4081</color>
+    <color name="Roxo">#a22be2</color>
+    <color name="Preto">#000000</color>
+    <color name="Branco">#ffffff</color>
+    <color name="Verde">#1db688</color>
+    <color name="VerdeEscuro1">#0b6449</color>
+    <color name="VerdeClaro1">#cafd66</color>
+    <color name="VerdeClaro2">#98fd01</color>
+    <color name="VerdeEscuro2">#659834</color>
+    <color name="VerdeEscuro3">#104d3a</color>
+    <color name="AzulMarinho">#1d88b6</color>
+
+    <!--Cores padrão do app-->
+    <color name="primary">#2196F3</color>
+    <color name="primary_dark">#1976D2</color>
+    <color name="primary_light">#BBDEFB</color>
+    <color name="accent">#00BCD4</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="divider">#BDBDBD</color>
+
+</resources>

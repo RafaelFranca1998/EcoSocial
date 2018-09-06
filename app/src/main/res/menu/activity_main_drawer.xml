@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_principal"
+            android:icon="@drawable/icons8_rss_50"
+            android:title="@string/principal" />
+        <item
+            android:id="@+id/nav_eventos"
+            android:icon="@drawable/icons8_map_marker_24"
+            android:title="@string/eventos" />
+        <item
+            android:id="@+id/nav_marcar_evento"
+            android:icon="@drawable/ic_map_marker_plus"
+            android:title="@string/string_marcar_evento" />
+    </group>
+
+    <item android:title="@string/communicate">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_menu_share"
+                android:title="@string/compartilhar" />
+            <item
+                android:id="@+id/nav_send"
+                android:icon="@drawable/ic_menu_send"
+                android:title="@string/convidar_amigos" />
+        </menu>
+    </item>
+
+</menu>
