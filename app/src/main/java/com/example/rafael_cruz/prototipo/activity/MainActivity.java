@@ -15,6 +15,7 @@ import android.view.MenuItem;
 
 import com.example.rafael_cruz.prototipo.R;
 import com.example.rafael_cruz.prototipo.fragments.AboutFragment;
+import com.example.rafael_cruz.prototipo.fragments.AddEventFragment;
 import com.example.rafael_cruz.prototipo.fragments.MainFragment;
 import com.example.rafael_cruz.prototipo.fragments.MapsFragment;
 
@@ -30,6 +31,9 @@ public class MainActivity extends AppCompatActivity
         toolbar = findViewById(R.id.toolbar);
         setToolbarTitle("Inicio");
         setSupportActionBar(toolbar);
+        navigationView = findViewById(R.id.nav_view);
+        navigationView.setCheckedItem(R.id.nav_principal);
+
         //Set the fragment Initially
         MainFragment fragment = new MainFragment();
         FragmentTransaction fragmentTransaction =
@@ -104,20 +108,20 @@ public class MainActivity extends AppCompatActivity
             fragmentTransaction.commit();
         } else if (id == R.id.nav_eventos) {
             MapsFragment fragment= new MapsFragment();
-         //   setToolbarTitle("Eventos");
+          setToolbarTitle("Eventos");
             android.support.v4.app.FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
         } else if (id == R.id.nav_marcar_evento) {
-//            SelectOnMapFragment fragment= new SelectOnMapFragment();
-//            android.support.v4.app.FragmentTransaction fragmentTransaction =
-//                    getSupportFragmentManager().beginTransaction();
-//            fragmentTransaction.replace(R.id.fragment_container, fragment);
-//            fragmentTransaction.commit();
+            AddEventFragment fragment= new AddEventFragment();
+            android.support.v4.app.FragmentTransaction fragmentTransaction =
+                    getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container, fragment);
+            fragmentTransaction.commit();
 
-            Intent intent =  new Intent(this,AddEventActivity.class);
-            startActivity(intent);
+//            Intent intent =  new Intent(this,AddEventActivity.class);
+//            startActivity(intent);
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {

@@ -102,9 +102,9 @@ public class AddEventActivity extends AppCompatActivity {
                         getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.replace(R.id.fragment_container_add_event, fragment);
                 fragmentTransaction.commit();
-//                FirebaseDatabase database = FirebaseDatabase.getInstance();
-//                DatabaseReference myRef = database.getReference("message");
-//                myRef.setValue("Hello, World!");
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference myRef = database.getReference("message");
+                myRef.setValue("Hello, World!");
             }
         });
 

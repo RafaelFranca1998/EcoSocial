@@ -104,8 +104,8 @@
         android:id="@+id/textView6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="14dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="28dp"
         android:layout_weight="1"
         android:text="Data"
         android:textColor="@color/Preto"
@@ -116,7 +116,8 @@
         android:id="@+id/editText_data_2"
         android:layout_width="102dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="17dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="12dp"
         android:layout_weight="1"
         android:ems="10"
         android:focusable="false"
@@ -131,13 +132,15 @@
         android:layout_marginBottom="36dp"
         android:layout_marginEnd="143dp"
         android:layout_marginStart="144dp"
+        android:layout_marginTop="226dp"
         android:background="@color/Verde"
         android:text="Avançar"
         android:textColor="@color/Branco"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.444"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editText_data_2" />
 
     <EditText
         android:id="@+id/editText_hora"
@@ -145,10 +148,12 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="32dp"
+        android:layout_marginTop="12dp"
         android:ems="10"
         android:focusable="false"
         android:inputType="time"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/tv_horario"
         app:layout_constraintTop_toBottomOf="@+id/switch_sem_limite_tempo" />
 
@@ -156,11 +161,11 @@
         android:id="@+id/tv_horario"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="39dp"
-        android:layout_marginTop="14dp"
+        android:layout_marginStart="216dp"
+        android:layout_marginTop="24dp"
         android:text="Horario"
         android:textColor="@color/Preto"
-        app:layout_constraintStart_toEndOf="@+id/editText_data"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/switch_sem_limite_tempo" />
 
 
