@@ -119,6 +119,8 @@ public class MainActivity extends AppCompatActivity
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
+            setToolbarTitle("Adicionar Evento");
+
 
 //            Intent intent =  new Intent(this,AddEventActivity.class);
 //            startActivity(intent);

@@ -8,26 +8,21 @@
     <string name="action_settings">Configurações</string>
     <string name="action_about">Sobre o App...</string>
     <string name="buttonPrincipal">Principal</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="buttonEncontros">Encontros</string>
     <string name="evento1">Evento</string>
     <string name="localdoEvento">Local: 1?</string>
     <string name="contato">Contatos: 1?</string>
     <string name="vazioText">Ainda Estou Vazio...T.T</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="sobre_o_app">Sobre o App</string>
     <string name="sobre_o_app2">Este é o protótipo de um App, ou seja a demosntração Gráfica do app</string>
     <string name="sobre_o_app3">Toda parte gráfica e implementação do
         App poderá ser Editada posteriormente de acordo com o projeto</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_settings">Settings</string>
 
-    <!-- Strings related to Settings -->
 
-    <!-- Example General settings -->
     <string name="pref_header_general">General</string>
 
     <string name="pref_title_social_recommendations">Enable social recommendations</string>
@@ -50,7 +45,6 @@
         <item>-1</item>
     </string-array>
 
-    <!-- Example settings for Data & Sync -->
     <string name="pref_header_data_sync">Data &amp; sync</string>
 
     <string name="pref_title_sync_frequency">Sync frequency</string>
@@ -109,4 +103,18 @@
     <string name="icone">icone</string>
     <string name="descricao">Descrição</string>
     <string name="title_activity_add_event2">Map</string>
+    <string name="title_activity_login">Entrar</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="action_sign_in">Login ou registrar</string>
+    <string name="action_sign_in_short">Login</string>
+    <string name="error_invalid_email">Email inválido</string>
+    <string name="error_invalid_password">Senha curta</string>
+    <string name="error_field_required">Este campo é necessário</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="prompt_password">Senha</string>
+    <string name="error_incorrect_password">Senha incorreta</string>
 </resources>
