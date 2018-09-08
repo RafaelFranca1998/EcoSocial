@@ -40,6 +40,8 @@
         <activity
             android:name=".activity.AddEventActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"></activity>
+
+
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -56,9 +58,10 @@
         </activity>
         <!-- Splash screen -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".activity.LoginActivity"
             android:label="@string/title_activity_login"
             android:parentActivityName=".activity.MainActivity">
+
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.rafael_cruz.prototipo.activity.MainActivity" />

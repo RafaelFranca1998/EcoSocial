@@ -124,7 +124,9 @@ public class MainActivity extends AppCompatActivity
 
 //            Intent intent =  new Intent(this,AddEventActivity.class);
 //            startActivity(intent);
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.nav_login){
+
+        }else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
 
