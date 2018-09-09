@@ -2,6 +2,7 @@ package com.example.rafael_cruz.prototipo.activity;
 
 
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
@@ -18,12 +19,11 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.rafael_cruz.prototipo.R;
-import com.example.rafael_cruz.prototipo.SelectOnMapFragment;
 import com.example.rafael_cruz.prototipo.config.DAO;
 import com.example.rafael_cruz.prototipo.model.Eventos;
 import com.github.rtoshiro.util.format.SimpleMaskFormatter;
 import com.github.rtoshiro.util.format.text.MaskTextWatcher;
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.MapView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -36,7 +36,6 @@ public class AddEventActivity extends AppCompatActivity {
     private Button buttonAvancar;
 
     private RadioGroup radioGroup;
-    private LatLng localizacao;
     private String      tipoevento;
     private Switch aSwitchSemlimitetempo;
     private EditText    editTextData;
@@ -97,11 +96,11 @@ public class AddEventActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // addEvent();
-                SelectOnMapFragment fragment = new SelectOnMapFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container_add_event, fragment);
-                fragmentTransaction.commit();
+//                SelectOnMapFragment fragment = new SelectOnMapFragment();
+//                android.support.v4.app.FragmentTransaction fragmentTransaction =
+//                        getSupportFragmentManager().beginTransaction();
+//                fragmentTransaction.replace(R.id.fragment_container_add_event, fragment);
+//                fragmentTransaction.commit();
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference myRef = database.getReference("message");
                 myRef.setValue("Hello, World!");
@@ -145,6 +144,7 @@ public class AddEventActivity extends AppCompatActivity {
 //                }
 //            }
 //        });
+
     }
 
     @Override
@@ -223,7 +223,4 @@ public class AddEventActivity extends AppCompatActivity {
     }
 
 
-    public void setLocalizacao(LatLng localizacao) {
-        this.localizacao = localizacao;
-    }
 }

@@ -35,7 +35,6 @@ public class SelectOnMapFragment extends android.support.v4.app.Fragment impleme
     private Context context;
     private int REQUEST_LOCATION;
     private MapView mMapView;
-
     private GoogleMap googleMap;
     private static LatLng position;
 
@@ -85,8 +84,8 @@ public class SelectOnMapFragment extends android.support.v4.app.Fragment impleme
                                 "Lat " + position.latitude + " "
                                         + "Long " + position.longitude,
                                 Toast.LENGTH_LONG).show();
-                        AddEventActivity activity1 = new AddEventActivity();
-                        activity1.setLocalizacao(position);
+//                        AddEventActivity activity1 = new AddEventActivity();
+//                        activity1.setLocalizacao(position);
                     }
                 });
 
