@@ -44,7 +44,6 @@ public class MainFragment extends Fragment {
         listView = rootView.findViewById(R.id.list);
 
 
-        Eventos eventos =  new Eventos(10,10,"10","10","10",100000,10000);
 
        // String[] dados = new String[] { "Cupcake", "Donut", "Eclair", "Froyo", "Gingerbread",
        //         "Honeycomb", "Ice Cream Sandwich", "Jelly Bean",

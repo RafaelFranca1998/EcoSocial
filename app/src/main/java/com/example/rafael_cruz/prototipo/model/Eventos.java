@@ -6,25 +6,25 @@ import java.util.Calendar;
 
 public class Eventos {
 
-    private int data,horario;
+    private String data,horario;
     static int dataCriacao;
     private String tipoEvento,local,descricao;
     private double lat,lon;
 
 
-    public int getData() {
+    public String getData() {
         return data;
     }
 
-    public void setData(int data) {
+    public void setData(String data) {
         this.data = data;
     }
 
-    public int getHorario() {
+    public String getHorario() {
         return horario;
     }
 
-    public void setHorario(int horario) {
+    public void setHorario(String horario) {
         this.horario = horario;
     }
 
@@ -87,7 +87,7 @@ public class Eventos {
         Log.i("data criacao",parse);
     }
 
-    public Eventos(int data, int horario, String tipoEvento, String local, String descricao, double lat, double lon) {
+    public Eventos(String data, String horario, String tipoEvento, String local, String descricao, double lat, double lon) {
         this.data = data;
         this.horario = horario;
         this.tipoEvento = tipoEvento;

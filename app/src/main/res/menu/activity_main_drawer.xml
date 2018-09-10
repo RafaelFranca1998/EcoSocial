@@ -18,7 +18,7 @@
             android:title="@string/string_marcar_evento" />
         <item
             android:id="@+id/nav_login"
-            android:icon="@drawable/ic_map_marker_plus"
+            android:icon="@drawable/ic_account_box"
             android:title="Login" />
     </group>
 

@@ -6,17 +6,16 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,23 +31,23 @@ import android.widget.Toast;
 
 import com.example.rafael_cruz.prototipo.R;
 import com.example.rafael_cruz.prototipo.activity.MainActivity;
+import com.example.rafael_cruz.prototipo.config.DAO;
+import com.example.rafael_cruz.prototipo.config.data_e_hora.Data;
+import com.example.rafael_cruz.prototipo.config.data_e_hora.Hora;
 import com.example.rafael_cruz.prototipo.model.Eventos;
 import com.github.rtoshiro.util.format.SimpleMaskFormatter;
 import com.github.rtoshiro.util.format.text.MaskTextWatcher;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DatabaseReference;
 
 import java.util.Calendar;
 
@@ -57,7 +56,7 @@ import java.util.Calendar;
  * A simple {@link Fragment} subclass.
  */
 public class AddEventFragment extends DialogFragment implements OnMapReadyCallback
-        , LocationSource.OnLocationChangedListener{
+        ,LocationListener{
 
     //Atributos do mapa
     int REQUEST_LOCATION;
@@ -67,25 +66,27 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
     Double latitude;
     Double longitude;
     private static LatLng position;
-    LocationManager manager;
+    LocationManager locationManager;
     LocationListener locationListener;
     boolean isDate;
+    private String provider;
 
 
-    static Eventos eventos;
+
+    private Eventos eventos;
 
     private EditText outroEditText;
     private Button buttonAvancar;
 
     private RadioGroup radioGroup;
-    private LatLng localizacao;
     private String tipoevento;
     private Switch aSwitchSemlimitetempo;
     private static EditText editTextData;
     private static EditText editTextHora;
     private static int year_x, month_x, day_x, hour_x, minute_x, hora;
-    static final int DIALOG_ID_DATE = 0;
-    static final int DIALOG_ID_TIME = 1;
+
+
+    DatabaseReference database;
 
     View rootView;
     Activity activity;
@@ -155,15 +156,7 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
         buttonAvancar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // addEvent();
-//                SelectOnMapFragment fragment = new SelectOnMapFragment();
-//                android.support.v4.app.FragmentTransaction fragmentTransaction =
-//                        getSupportFragmentManager().beginTransaction();
-//                fragmentTransaction.replace(R.id.fragment_container_add_event, fragment);
-//                fragmentTransaction.commit();
-//                FirebaseDatabase database = FirebaseDatabase.getInstance();
-//                DatabaseReference myRef = database.getReference("message");
-//                myRef.setValue("Hello, World!");
+                 addEvento();
             }
         });
 
@@ -211,6 +204,7 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
         mMapView = rootView.findViewById(R.id.mapView2);
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume(); // needed to get the map to display immediately
+        provider = MainActivity.provider;
 
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
@@ -254,8 +248,6 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
             @Override
             public void onMapReady(GoogleMap mMap) {
                 mGoogleMap = mMap;
-                LocationManager locationManager = (LocationManager)
-                        getActivity().getSystemService(Context.LOCATION_SERVICE);
 
                 if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -268,9 +260,10 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
                     mGoogleMap.setMyLocationEnabled(true);
                 }
                 //todo por enquanto está null
-                //locationListener.onLocationChanged(mLocation);
-                manager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
-                mLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+//                locationManager = (LocationManager)getActivity().getSystemService(provider);
+                locationManager = MainActivity.locationManager;
+//                locationListener.onLocationChanged(mLocation);
+                mLocation = locationManager.getLastKnownLocation(provider);
                 if (mLocation != null){
                     latitude = mLocation.getLatitude();
                     longitude = mLocation.getLongitude();
@@ -281,9 +274,11 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
 
 
                 // For dropping a marker at a point on the Map
-                LatLng salvador = new LatLng(latitude,longitude);
-                mGoogleMap.addMarker(new MarkerOptions().position(salvador).title("Coleta de Lixo")
-                        .snippet("Local: Sua casa \n Horario: o dia todo ").draggable(true));
+                //todo verificação lat/lng
+                LatLng salvador;
+                    salvador = new LatLng(latitude, longitude);
+                    mGoogleMap.addMarker(new MarkerOptions().position(salvador).title("Coleta de Lixo")
+                            .snippet("Local: Sua casa \n Horario: o dia todo ").draggable(true));
 
 
 
@@ -326,6 +321,28 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
         return rootView;
     }
 
+
+
+
+    public void addEvento(){
+        eventos =  new Eventos();
+        eventos.setData((Data.dateToString(year_x,month_x,day_x)));
+        eventos.setHorario(Hora.hourToString(hour_x,minute_x));
+        if (tipoevento.equals("Outro...")){
+            eventos.setTipoEvento(outroEditText.getText().toString());
+        }else {
+            eventos.setTipoEvento(tipoevento);
+        }
+        eventos.setLat(latitude);
+        eventos.setLon(longitude);
+        database = DAO.getFireBase();
+        database.child("events").push().setValue(eventos);
+        Toast.makeText(getActivity(),"Adicionado!",Toast.LENGTH_SHORT).show();
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.fragment_container, new MainFragment(), "NewFragmentTag");
+        ft.commit();
+    }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
@@ -359,59 +376,21 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
     public void onLocationChanged(Location location) {
         mLocation = location;
     }
-//    @Override
-//    protected Dialog onCreateDialog(int id){
-//        if (id == DIALOG_ID_DATE){
-//            return new DatePickerDialog(getActivity(),dpickerListener,year_x,month_x,day_x);
-//        }else {
-//            return new TimePickerDialog(getActivity(),kTimeListener,hour_x,minute_x,false);
-//        }
-//    }
 
-    private TimePickerDialog.OnTimeSetListener kTimeListener =  new TimePickerDialog.OnTimeSetListener() {
-        @Override
-        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            hour_x = hourOfDay;
-            minute_x = minute;
-            String parse;
-            if (hour_x < 9 && minute_x < 9){
-                parse = "0"+hour_x +"0"+minute_x;
-            }else if (hour_x > 9 && minute_x < 9){
-                parse = hour_x +"0"+minute_x;
-            }else if (hour_x < 9 && minute_x > 9){
-                parse = "0"+hour_x +minute_x;
-            }else {
-                parse = hour_x +""+minute_x;
-            }
-            editTextHora.setText(parse);
-        }
-    };
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
 
-    private DatePickerDialog.OnDateSetListener dpickerListener =  new DatePickerDialog.OnDateSetListener() {
-        @Override
-        public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-            year_x = year;
-            month_x = month + 1;
-            day_x = dayOfMonth;
-            String parse;
-            if (month_x<10&&day_x>9){
-                parse = day_x+"0"+month_x +""+year_x;
-            }else if (day_x<10&&month_x<10){
-                parse = "0"+day_x+"0"+month_x +""+year_x;
-            }else if (day_x < 10&&month_x>9){
-                parse = "0"+day_x+""+month_x +""+year_x;
-            }else {
-                parse = day_x+""+month_x +""+year_x;
-            }
-            String dataString = String.valueOf(parse);
-            Log.i("dia",String.valueOf(day_x));
-            Log.i("mes",String.valueOf(month_x));
-            Log.i("ano",String.valueOf(year_x));
-            editTextData.setText(String.valueOf(dataString));
-        }
-    };
+    }
 
+    @Override
+    public void onProviderEnabled(String provider) {
 
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
 
     public static class SelectDateFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
@@ -428,21 +407,10 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
             year_x = yy;
             month_x = mm + 1;
             day_x = dd;
-            String parse;
-            if (month_x<10&&day_x>9){
-                parse = day_x+"0"+month_x +""+year_x;
-            }else if (day_x<10&&month_x<10){
-                parse = "0"+day_x+"0"+month_x +""+year_x;
-            }else if (day_x < 10&&month_x>9){
-                parse = "0"+day_x+""+month_x +""+year_x;
-            }else {
-                parse = day_x+""+month_x +""+year_x;
-            }
-            String dataString = String.valueOf(parse);
-            Log.i("dia",String.valueOf(day_x));
-            Log.i("mes",String.valueOf(month_x));
-            Log.i("ano",String.valueOf(year_x));
-            editTextData.setText(String.valueOf(dataString));
+            Log.i("dia: ",String.valueOf(day_x));
+            Log.i("mes: ",String.valueOf(month_x));
+            Log.i("ano: ",String.valueOf(year_x));
+            editTextData.setText(Data.dateToString(year_x,month_x,day_x));
         }
     }
 
@@ -470,23 +438,8 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
             // Do something with the time chosen by the user
             hour_x = hourOfDay;
             minute_x = minute;
-            String parse;
-            if (hour_x < 9 && minute_x < 9){
-                parse = "0"+hour_x +"0"+minute_x;
-            }else if (hour_x > 9 && minute_x < 9){
-                parse = hour_x +"0"+minute_x;
-            }else if (hour_x < 9 && minute_x > 9){
-                parse = "0"+hour_x +minute_x;
-            }else {
-                parse = hour_x +""+minute_x;
-            }
-            editTextHora.setText(parse);
-
+            editTextHora.setText(Hora.hourToString(hour_x,minute_x));
         }
     }
-
-
-
-
 }
 

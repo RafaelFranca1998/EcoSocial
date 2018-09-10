@@ -208,14 +208,14 @@ public class AddEventActivity extends AppCompatActivity {
         //Obtem opção do radiogroup tipo de evento
         eventos.setTipoEvento(tipoevento);
         //define se o evento terá horario especifico
-        eventos.setHorario(hora);
+        eventos.setHorario(String.valueOf(hora));
         Log.i("Hora do evento",Integer.toString(hora));
 
         // data
         String data = editTextData.getText().toString().replace("/","");
         data.replaceAll("[/]","");
         Log.i("data",data);
-        eventos.setData(Integer.parseInt(data));
+        eventos.setData(data);
 
 
         database.push().setValue(eventos);
