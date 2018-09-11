@@ -7,6 +7,8 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -49,7 +51,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseReference;
 
+import java.io.IOException;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -65,6 +70,8 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
     Location mLocation;
     Double latitude;
     Double longitude;
+    Double lat;
+    Double lng;
     private static LatLng position;
     LocationManager locationManager;
     LocationListener locationListener;
@@ -310,8 +317,8 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
                                 "Lat " + position.latitude + " "
                                         + "Long " + position.longitude,
                                 Toast.LENGTH_LONG).show();
-                        latitude = position.latitude;
-                        longitude = position.longitude;
+                        lat = position.latitude;
+                        lng = position.longitude;
                     }
                 });
             }
@@ -333,8 +340,22 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
         }else {
             eventos.setTipoEvento(tipoevento);
         }
-        eventos.setLat(latitude);
-        eventos.setLon(longitude);
+        if (lat == null && lng == null){
+         lat = latitude;
+         lng = longitude;
+        }
+        eventos.setLat(lat);
+        eventos.setLon(lng);
+        Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
+        List<Address> local;
+        try {
+            local = geocoder.getFromLocation(lng,lat,1);
+            Address address = local.get(0);
+            eventos.setLocal(address.getAddressLine(0)+"/"+address.getLocality());
+            Log.i("Endereço: ",address.getAddressLine(0)+"/"+address.getLocality());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         database = DAO.getFireBase();
         database.child("events").push().setValue(eventos);
         Toast.makeText(getActivity(),"Adicionado!",Toast.LENGTH_SHORT).show();

@@ -45,8 +45,8 @@
                     android:id="@+id/imgview_logo"
                     android:layout_width="200dp"
                     android:layout_height="200dp"
-                    android:layout_marginTop="50dp"
                     android:layout_marginBottom="50dp"
+                    android:layout_marginTop="50dp"
                     android:src="@drawable/logo_prototipo_mateus" />
             </LinearLayout>
 
@@ -93,17 +93,40 @@
                     android:textColorHighlight="@color/Preto"
                     android:singleLine="true" />
 
-                <Button
-                    android:id="@+id/email_sign_in_button"
-                    style="?android:textAppearanceSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@color/primary_dark"
-                    android:text="@string/action_sign_in_short"
-                    android:textColor="@color/Branco"
-                    android:textStyle="bold" />
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/email_sign_in_button"
+                        style="?android:textAppearanceSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_weight="1"
+                        android:elevation="5dp"
+                        android:background="@color/primary_dark"
+                        android:text="@string/action_sign_in_short"
+                        android:textAlignment="center"
+                        android:textColor="@color/Branco"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/bt_cadastre_se"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginStart="30dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_weight="1"
+                        android:background="@color/primary_dark"
+                        android:text="Cadastre-se"
+                        android:textColor="@color/Branco" />
+
+                </LinearLayout>
 
 
             </LinearLayout>
@@ -116,14 +139,6 @@
                 android:gravity="center_vertical|center_horizontal"
                 >
 
-                <TextView
-                    android:id="@+id/tv_cadastrar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Não tem conta? Cadastre-se"
-                    android:layout_marginTop="10dp"
-                    android:textAlignment="textEnd"
-                    android:textColor="@color/Branco" />
             </LinearLayout>
 
         </LinearLayout>
