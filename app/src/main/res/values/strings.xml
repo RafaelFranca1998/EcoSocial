@@ -117,4 +117,8 @@
     </string>
     <string name="prompt_password">Senha</string>
     <string name="error_incorrect_password">Senha incorreta</string>
+    <string name="telefone_text">Telefone</string>
+    <string name="senha_text">Senha</string>
+    <string name="e_mail_text">E-mail</string>
+    <string name="nome_text">Nome</string>
 </resources>
