@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary"
+    android:orientation="vertical"
     tools:context=".activity.CadastroActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_marginStart="20dp"
+        android:layout_marginBottom="50dp"
         android:layout_marginEnd="20dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="200dp"
-        android:layout_marginBottom="50dp">
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/txt_nome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/nome_text"
@@ -26,17 +27,18 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
-            android:id="@+id/editText2"
+            android:id="@+id/editText_nome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/background_text"
             android:ems="10"
             android:hint="@string/nome_text"
             android:inputType="textPersonName"
+            android:textColor="@color/Branco"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView10"
+            android:id="@+id/txt_telefone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/telefone_text"
@@ -51,11 +53,11 @@
             android:background="@drawable/background_text"
             android:ems="10"
             android:hint="@string/telefone_text"
-            android:inputType="textPersonName"
+            android:inputType="phone"
             android:textColor="@color/Branco" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/txt_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/prompt_email"
@@ -64,17 +66,18 @@
             tools:layout_editor_absoluteY="174dp" />
 
         <EditText
-            android:id="@+id/editText"
+            android:id="@+id/editText_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/background_text"
             android:ems="10"
             android:hint="@string/e_mail_text"
             android:inputType="textEmailAddress"
+            android:textColor="@color/Branco"
             app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
-            android:id="@+id/textView8"
+            android:id="@+id/txt_senha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/senha_text"
@@ -83,14 +86,27 @@
             tools:layout_editor_absoluteY="246dp" />
 
         <EditText
-            android:id="@+id/editText3"
+            android:id="@+id/editText_senha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/background_text"
             android:ems="10"
             android:hint="@string/senha_text"
-            android:inputType="textPersonName" />
+            android:inputType="textPersonName"
+            android:textColor="@color/Branco" />
+
+        <Button
+            android:id="@+id/bt_cadastrar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:background="@color/primary_dark"
+            android:elevation="10dp"
+            android:text="Cadastrar"
+            android:textAlignment="center"
+            android:textColor="@color/Branco" />
 
     </LinearLayout>
 
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>

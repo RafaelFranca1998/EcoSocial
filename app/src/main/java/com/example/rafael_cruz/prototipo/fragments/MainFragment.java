@@ -3,6 +3,7 @@ package com.example.rafael_cruz.prototipo.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,9 +14,14 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.example.rafael_cruz.prototipo.config.AdapterListView;
+import com.example.rafael_cruz.prototipo.config.DAO;
 import com.example.rafael_cruz.prototipo.config.ItemListView;
 import com.example.rafael_cruz.prototipo.R;
 import com.example.rafael_cruz.prototipo.model.Eventos;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +36,11 @@ public class MainFragment extends Fragment {
     private Toolbar             toolbar;
     private String              FINAL_DESCRICAO      = "Descrição: ";
     private String              FINAL_LOCALIDADE     = "Localidade: ";
+    private String              FINAL_TAG_EVENTOS    = "events";
     private ItemListView        itemListView;
     private List<ItemListView>  itens;
+    private List<Eventos>       listEventos;
+    DatabaseReference           databaseReference;
 
 
     public MainFragment() {
@@ -43,6 +52,39 @@ public class MainFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         listView = rootView.findViewById(R.id.list);
 
+        itens = new ArrayList<ItemListView>();
+        listEventos =  new ArrayList<>();
+        databaseReference = DAO.getFireBase().child(FINAL_TAG_EVENTOS);
+
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot data: dataSnapshot.getChildren()){
+                    listEventos.add(dataSnapshot.getValue(Eventos.class));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+        for (int i = 0; listEventos.size()< i ; i++){
+            Eventos eventos = listEventos.get(i);
+            itemListView = new ItemListView();
+            itemListView.setTextoLocalidade(eventos.getLocal());
+            itemListView.setTextoDescricao(eventos.getTipoEvento());
+            String tipoEvento = eventos.getTipoEvento();
+            if (tipoEvento.equals("Animal Perdido")){
+                itemListView.setIconeRid(R.drawable.icon_cachorro_perdido);
+            }else {
+                itemListView.setIconeRid(R.drawable.icons8_rss_50);
+            }
+            itens.add(itemListView);
+        }
+
 
 
        // String[] dados = new String[] { "Cupcake", "Donut", "Eclair", "Froyo", "Gingerbread",
@@ -53,9 +95,9 @@ public class MainFragment extends Fragment {
 
       //  listView.setAdapter(adapter);
 
-        itemListView =  new ItemListView();
 
-        itens = new ArrayList<ItemListView>();
+
+
 
         addEvent("Cachorro perdido","Federação",R.drawable.icon_cachorro_perdido);
 

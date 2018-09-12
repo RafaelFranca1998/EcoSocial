@@ -12,7 +12,7 @@
     <color name="VerdeClaro2">#98fd01</color>
     <color name="VerdeEscuro2">#659834</color>
     <color name="VerdeEscuro3">#104d3a</color>
-    <color name="AzulMarinhoOpaco">#7658a8ca</color>
+    <color name="branco_opaco">#76d4eaf4</color>
 
     <!--Cores padrão do app-->
     <color name="primary">#2196F3</color>

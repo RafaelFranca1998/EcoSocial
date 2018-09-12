@@ -3,12 +3,13 @@ package com.example.rafael_cruz.prototipo.config;
 import android.util.Log;
 
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class DAO {
     private static DatabaseReference referenciaFirebase;
-    //private static FirebaseAuth autenticacao;
+    private static FirebaseAuth autenticacao;
 
     public DAO() {
     }
@@ -20,12 +21,12 @@ public class DAO {
         return referenciaFirebase;
     }
 
-//    public static FirebaseAuth getFirebaseAutenticacao(){
-//        if (autenticacao == null){
-//            autenticacao = FirebaseAuth.getInstance();
-//        }
-//        return autenticacao;
-//    }
+    public static FirebaseAuth getFirebaseAutenticacao(){
+        if (autenticacao == null){
+            autenticacao = FirebaseAuth.getInstance();
+        }
+        return autenticacao;
+    }
 
 //    public void criaEvento(Eventos eventos){
 //        referenciaFirebase.child("eventos").child(String.valueOf(Eventos.getDataCriacao())).child(String.valueOf(Eventos.getSerialNumber())).setValue(eventos);
