@@ -40,6 +40,8 @@ import com.example.rafael_cruz.prototipo.model.Eventos;
 import com.github.rtoshiro.util.format.SimpleMaskFormatter;
 import com.github.rtoshiro.util.format.text.MaskTextWatcher;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -49,9 +51,11 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -61,8 +65,7 @@ import java.util.Locale;
  * A simple {@link Fragment} subclass.
  */
 public class AddEventFragment extends DialogFragment implements OnMapReadyCallback
-        ,LocationListener{
-
+        , LocationListener {
     //Atributos do mapa
     int REQUEST_LOCATION;
     MapView mMapView;
@@ -77,23 +80,21 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
     LocationListener locationListener;
     boolean isDate;
     private String provider;
-
-
-
     private Eventos eventos;
-
     private EditText outroEditText;
     private Button buttonAvancar;
-
     private RadioGroup radioGroup;
     private String tipoevento;
     private Switch aSwitchSemlimitetempo;
     private static EditText editTextData;
     private static EditText editTextHora;
     private static int year_x, month_x, day_x, hour_x, minute_x, hora;
-
-
+    private static String local;
     DatabaseReference database;
+
+    List<Address> addresses;
+    Geocoder geocoder;
+
 
     View rootView;
     Activity activity;
@@ -109,10 +110,14 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
 
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_add_event, container, false);
-
         ((MainActivity) getActivity()).setToolbarTitle("Adicionar Eventos");
 
+        //diz a atividade principal que estamos em um fragment
+        MainActivity.isInFragment = true;
+
         activity = getActivity();
+
+        geocoder = new Geocoder(getActivity(), Locale.getDefault());
 
         radioGroup = rootView.findViewById(R.id.radioGroup);
         outroEditText = rootView.findViewById(R.id.editText_outro);
@@ -145,8 +150,8 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
 
                 DialogFragment newFragment = new SelectDateFragment();
                 newFragment.show(getFragmentManager(), "DatePicker");
-               // getActivity().onCreateDialog(DIALOG_ID_DATE);
-                isDate =  true;
+                // getActivity().onCreateDialog(DIALOG_ID_DATE);
+                isDate = true;
             }
         });
 
@@ -156,29 +161,29 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
                 isDate = false;
                 DialogFragment newFragment = new TimePickerFragment();
                 newFragment.show(getFragmentManager(), "TimePicker");
-           //     getActivity().showDialog(DIALOG_ID_TIME);
+                //     getActivity().showDialog(DIALOG_ID_TIME);
             }
         });
 
         buttonAvancar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                 addEvento();
+                addEvento();
             }
         });
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.radio_button_animal_perdido){
+                if (checkedId == R.id.radio_button_animal_perdido) {
                     tipoevento = "Animal Perdido";
                     outroEditText.setEnabled(false);
-                    Toast.makeText(activity,"Animal",Toast.LENGTH_LONG).show();
-                } else if (checkedId == R.id.radio_button_coleta_de_lixo){
+                    Toast.makeText(activity, "Animal", Toast.LENGTH_LONG).show();
+                } else if (checkedId == R.id.radio_button_coleta_de_lixo) {
                     tipoevento = "Coleta de lixo";
                     outroEditText.setEnabled(false);
-                    Toast.makeText(activity,"Coleta",Toast.LENGTH_LONG).show();
-                } else if (checkedId == R.id.radio_button_outro){
+                    Toast.makeText(activity, "Coleta", Toast.LENGTH_LONG).show();
+                } else if (checkedId == R.id.radio_button_outro) {
                     outroEditText.setEnabled(true);
                     tipoevento = outroEditText.getText().toString();
                 }
@@ -186,25 +191,22 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
         });
 
 
-
-
         aSwitchSemlimitetempo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (aSwitchSemlimitetempo.isActivated()){
-                    Log.i("if",String.valueOf( aSwitchSemlimitetempo.isActivated()));
+                if (aSwitchSemlimitetempo.isActivated()) {
+                    Log.i("if", String.valueOf(aSwitchSemlimitetempo.isActivated()));
                     editTextHora.setEnabled(false);
                     hora = 0000;
                     editTextData.setText(hora);
-                }else {
-                    Log.i("else",String.valueOf( aSwitchSemlimitetempo.isActivated()));
+                } else {
+                    Log.i("else", String.valueOf(aSwitchSemlimitetempo.isActivated()));
                     editTextHora.setEnabled(true);
                     editTextHora.setText("0000");
-                    hora = Integer.parseInt(editTextHora.getText().toString().replace(":",""));
+                    hora = Integer.parseInt(editTextHora.getText().toString().replace(":", ""));
                 }
             }
         });
-
 
 
         // todo inicializa o mapa
@@ -212,6 +214,9 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume(); // needed to get the map to display immediately
         provider = MainActivity.provider;
+        if (provider == null) {
+            provider = "gps";
+        }
 
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
@@ -225,11 +230,11 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
             ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},REQUEST_LOCATION );
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
             ActivityCompat.requestPermissions(getActivity(),
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                     REQUEST_LOCATION);
-        }else {
+        } else {
         }
 
         try {
@@ -239,16 +244,12 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
         }
 
 
-
-
-
 //        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
 //                .addConnectionCallbacks(this)
 //                .addOnConnectionFailedListener(this)
 //                .addApi(LocationServices.API).build();
 //
 //        mGoogleApiClient.connect();
-
 
 
         mMapView.getMapAsync(new OnMapReadyCallback() {
@@ -271,10 +272,10 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
                 locationManager = MainActivity.locationManager;
 //                locationListener.onLocationChanged(mLocation);
                 mLocation = locationManager.getLastKnownLocation(provider);
-                if (mLocation != null){
+                if (mLocation != null) {
                     latitude = mLocation.getLatitude();
                     longitude = mLocation.getLongitude();
-                    Log.i("Debug","Latitude:"+latitude+"\n Longitude:"+longitude);
+                    Log.i("Debug", "Latitude:" + latitude + "\n Longitude:" + longitude);
                 }
 
                 // For showing a move to my location button
@@ -283,11 +284,17 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
                 // For dropping a marker at a point on the Map
                 //todo verificação lat/lng
                 LatLng salvador;
+                try {
                     salvador = new LatLng(latitude, longitude);
-                    mGoogleMap.addMarker(new MarkerOptions().position(salvador).title("Coleta de Lixo")
-                            .snippet("Local: Sua casa \n Horario: o dia todo ").draggable(true));
-
-
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    salvador = new LatLng(-13.003257, -38.523767);
+                } catch (Exception e) {
+                    salvador = new LatLng(-13.003257, -38.523767);
+                    e.printStackTrace();
+                }
+                mGoogleMap.addMarker(new MarkerOptions().position(salvador).title("Coleta de Lixo")
+                        .snippet("Local: Sua casa \n Horario: o dia todo ").draggable(true));
 
                 // For zooming automatically to the location of the marker
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(salvador).zoom(12).build();
@@ -329,33 +336,56 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
     }
 
 
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
 
+        return new Dialog(getActivity(), getTheme()) {
+            @Override
+            public void onBackPressed() {
+                // On backpress, do your stuff here.
+                MainFragment nextFrag = new MainFragment();
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, nextFrag, "findThisFragment")
+                        .addToBackStack(null)
+                        .commit();
+            }
+        };
+    }
 
-    public void addEvento(){
-        eventos =  new Eventos();
-        eventos.setData((Data.dateToString(year_x,month_x,day_x)));
-        eventos.setHorario(Hora.hourToString(hour_x,minute_x));
-        if (tipoevento.equals("Outro...")){
+    public void addEvento() {
+        eventos = new Eventos();
+        eventos.setData((Data.dateToString(year_x, month_x, day_x)));
+        eventos.setHorario(Hora.hourToString(hour_x, minute_x));
+        if (tipoevento.equals("Outro...")) {
             eventos.setTipoEvento(outroEditText.getText().toString());
-        }else {
+        } else {
             eventos.setTipoEvento(tipoevento);
         }
-        if (lat == null && lng == null){
-         lat = latitude;
-         lng = longitude;
+        if (lat == null && lng == null) {
+            lat = latitude;
+            lng = longitude;
         }
         eventos.setLat(lat);
         eventos.setLon(lng);
-        Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
-        List<Address> local;
+
+        if (local != null) {
+            eventos.setLocal(local);
+        }
+
         try {
-            local = geocoder.getFromLocation(lng,lat,1);
-            Address address = local.get(0);
-            eventos.setLocal(address.getAddressLine(0)+"/"+address.getLocality());
-            Log.i("Endereço: ",address.getAddressLine(0)+"/"+address.getLocality());
+            addresses = geocoder.getFromLocation(lat, lng, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
         } catch (IOException e) {
             e.printStackTrace();
         }
+        String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+        String city = addresses.get(0).getLocality();
+        String state = addresses.get(0).getAdminArea();
+        String country = addresses.get(0).getCountryName();
+        String postalCode = addresses.get(0).getPostalCode();
+        String knownName = addresses.get(0).getFeatureName(); // Only if available else return NULL
+
+        eventos.setLocal(address);
+
         database = DAO.getFireBase();
         database.child("events").push().setValue(eventos);
         Toast.makeText(getActivity(),"Adicionado!",Toast.LENGTH_SHORT).show();
@@ -461,6 +491,10 @@ public class AddEventFragment extends DialogFragment implements OnMapReadyCallba
             minute_x = minute;
             editTextHora.setText(Hora.hourToString(hour_x,minute_x));
         }
+    }
+
+    public static void setLocal(String localizacao) {
+        local = localizacao;
     }
 }
 

@@ -1,45 +1,44 @@
 package com.example.rafael_cruz.prototipo.config;
 
 import java.util.Date;
-@Deprecated
 /**
 ainda não vamos usar
 */
 public class ItemEvento {
-    private int   tipoEvento; // 1 =  Animal perdido 2 = Coleta de lixo 3 = Outro(requer especificação *tipoOutro*)
-    private String tipoOutro; // todo limitar a 40 caracteres
-    private Date     horario; // data* só vai ser usado caso diatodo seja true
-    private boolean  diaTodo;
+    private String   tipoEvento,Local;
+    private int iconeRid;
 
-    public int getTipoEvento() {
+    public ItemEvento(String tipoEvento, String local, int iconeRid) {
+        this.tipoEvento = tipoEvento;
+        Local = local;
+        this.iconeRid = iconeRid;
+    }
+
+    public ItemEvento() {
+        this("","", -1);
+    }
+
+    public String getTipoEvento() {
         return tipoEvento;
     }
 
-    public void setTipoEvento(int tipoEvento) {
+    public void setTipoEvento(String tipoEvento) {
         this.tipoEvento = tipoEvento;
     }
 
-    public String getTipoOutro() {
-        return tipoOutro;
+    public String getLocal() {
+        return Local;
     }
 
-    public void setTipoOutro(String tipoOutro) {
-        this.tipoOutro = tipoOutro;
+    public void setLocal(String local) {
+        Local = local;
     }
 
-    public Date getHorario() {
-        return horario;
+    public int getIconeRid() {
+        return iconeRid;
     }
 
-    public void setHorario(Date horario) {
-        this.horario = horario;
-    }
-
-    public boolean isDiaTodo() {
-        return diaTodo;
-    }
-
-    public void setDiaTodo(boolean diaTodo) {
-        this.diaTodo = diaTodo;
+    public void setIconeRid(int iconeRid) {
+        this.iconeRid = iconeRid;
     }
 }

@@ -7,7 +7,7 @@ import java.util.Calendar;
 public class Eventos {
 
     private String data,horario;
-    static int dataCriacao;
+    static int dataCriacao,iconeRid;
     private String tipoEvento,local,descricao;
     private double lat,lon;
 
@@ -80,11 +80,6 @@ public class Eventos {
 
 
     public Eventos() {
-        //Obtem data atual
-        final Calendar calendar = Calendar.getInstance();
-        String parse = calendar.get(Calendar.DAY_OF_MONTH)+""+calendar.get(Calendar.MONTH)+""+calendar.get(Calendar.YEAR);
-        this.dataCriacao = Integer.parseInt(parse);
-        Log.i("data criacao",parse);
     }
 
     public Eventos(String data, String horario, String tipoEvento, String local, String descricao, double lat, double lon) {
@@ -95,5 +90,13 @@ public class Eventos {
         this.descricao = descricao;
         this.lat = lat;
         this.lon = lon;
+    }
+
+    public static int getIconeRid() {
+        return iconeRid;
+    }
+
+    public static void setIconeRid(int iconeRid) {
+        Eventos.iconeRid = iconeRid;
     }
 }

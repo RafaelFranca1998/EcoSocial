@@ -2,14 +2,20 @@ package com.example.rafael_cruz.prototipo.activity;
 
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
@@ -20,21 +26,39 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.rafael_cruz.prototipo.GeocoderService;
 import com.example.rafael_cruz.prototipo.R;
+import com.example.rafael_cruz.prototipo.config.DAO;
+import com.example.rafael_cruz.prototipo.config.Preferencias;
 import com.example.rafael_cruz.prototipo.fragments.AboutFragment;
 import com.example.rafael_cruz.prototipo.fragments.AddEventFragment;
 import com.example.rafael_cruz.prototipo.fragments.MainFragment;
 import com.example.rafael_cruz.prototipo.fragments.MapsFragment;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, LocationListener {
+        implements NavigationView.OnNavigationItemSelectedListener, LocationListener{
     NavigationView navigationView;
     Toolbar toolbar;
     public static LocationManager locationManager;
     public static String provider;
-
+    private FirebaseAuth auntenticacao;
+    //caso estiver na atividade principal
+    public static boolean isFinsihActivity = false;
+    //caso estiver em um fragment
+    public static boolean isInFragment = false;
+    //atributo da classe.
+    private AlertDialog alerta;
+    //atributos do servico
+    protected Location mLastLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,13 +79,7 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        //-----------------------------INICIA FRAGMENT------------------------
-        MainFragment fragment = new MainFragment();
-        FragmentTransaction fragmentTransaction =
-                getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, fragment);
-        fragmentTransaction.commit();
-        //-------------------------------------------------------------------------
+        //---------------------------------------------------------------------
         // Get the location manager
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         // Define the criteria how to select the locatioin provider -> use
@@ -69,13 +87,6 @@ public class MainActivity extends AppCompatActivity
         Criteria criteria = new Criteria();
         provider = locationManager.getBestProvider(criteria, false);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         Location location = locationManager.getLastKnownLocation(provider);
@@ -84,20 +95,83 @@ public class MainActivity extends AppCompatActivity
             System.out.println("Provider " + provider + " has been selected.");
             onLocationChanged(location);
         } else {
-          //  latituteField.setText("Location not available");
-          //  longitudeField.setText("Location not available");
+            //  latituteField.setText("Location not available");
+            //  longitudeField.setText("Location not available");
+        }
+        // Obtém a referência da view de cabeçalho
+        View headerView = navigationView.getHeaderView(0);
+
+        // Obtém a referência do nome do usuário e altera seu nome
+        TextView txtLogin = (TextView) headerView.findViewById(R.id.usuario_nome_login);
+        TextView txtEmail = (TextView) headerView.findViewById(R.id.textView_nav_header_email);
+        TextView txtNome = (TextView) headerView.findViewById(R.id.textview_nav_header_nome);
+        ImageView imageLogo = (ImageView) headerView.findViewById(R.id.imageViewLogo);
+
+        if (verificarUsuarioLogado()) {
+            //TODO Resolvido: não consigo setar o nome do usuario
+            Preferencias preferencias = new Preferencias(MainActivity.this);
+            txtLogin.setText("");
+            txtEmail.setText(preferencias.getEmail());
+            txtNome.setText(preferencias.getNome());
+        } else {
+//            textViewUsuarioNome.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    Intent intent =  new Intent(MainActivity.this,LoginActivity.class);
+//                    startActivity(intent);
+//                }
+//            });
         }
 
+        //-----------------------------INICIA FRAGMENT------------------------
+        //TODO sempre iniciar por ultimo
+        MainFragment fragment = new MainFragment();
+        FragmentTransaction fragmentTransaction =
+                getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, fragment);
+        fragmentTransaction.commit();
     }
+
+
+
+
 
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        } else if (isFinsihActivity == true && isInFragment == false){
+            abrirDialog();
+        } else if (isInFragment){
             super.onBackPressed();
         }
+    }
+
+    private void abrirDialog() {
+        //Cria o gerador do AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        //define o titulo
+        builder.setTitle("Sair?");
+        //define a mensagem
+        builder.setMessage("Realmente quer sair?");
+        //define um botão como positivo
+        builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+                Toast.makeText(MainActivity.this, "positivo=" + arg1, Toast.LENGTH_SHORT).show();
+                finishAffinity();
+            }
+        });
+        //define um botão como negativo.
+        builder.setNegativeButton("Não", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+                Toast.makeText(MainActivity.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
+            }
+        });
+        //cria o AlertDialog
+        alerta = builder.create();
+        //Exibe
+        alerta.show();
     }
 
     @Override
@@ -136,7 +210,6 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.nav_principal) {
@@ -147,7 +220,7 @@ public class MainActivity extends AppCompatActivity
             fragmentTransaction.commit();
         } else if (id == R.id.nav_eventos) {
             MapsFragment fragment= new MapsFragment();
-          setToolbarTitle("Eventos");
+            setToolbarTitle("Eventos");
             android.support.v4.app.FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
@@ -188,18 +261,20 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private boolean verificarUsuarioLogado(){
+        auntenticacao =  DAO.getFirebaseAutenticacao();
+        if (auntenticacao.getCurrentUser() != null){
+            return  true;
+            //       abrirTelaPrincipal();
+        }
+        return false;
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         // todo request updates from locations
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         locationManager.requestLocationUpdates(provider, 400, 1, this);
@@ -233,4 +308,11 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(this, "Disabled provider " + provider,
                 Toast.LENGTH_SHORT).show();
     }
+    //abre a tela de login
+    public void abrir_login(View view){
+        Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+        startActivity(intent);
+    }
+
+
 }

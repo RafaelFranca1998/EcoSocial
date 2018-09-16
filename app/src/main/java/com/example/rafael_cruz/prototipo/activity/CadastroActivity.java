@@ -62,6 +62,10 @@ public class CadastroActivity extends AppCompatActivity {
         buttoncadastrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                usuario = new Usuario();
+                usuario.setNome(editTextNome.getText().toString());
+                usuario.setEmail(editTextEmail.getText().toString());
+                usuario.setSenha(editTextSenha.getText().toString());
                 cadastrar();
             }
         });
@@ -97,7 +101,6 @@ public class CadastroActivity extends AppCompatActivity {
         usuario.setEmail(editTextEmail.getText().toString());
         usuario.setNome(editTextNome.getText().toString());
         usuario.setTelefone(editTextTelefone.getText().toString());
-        database.child("usuarios").child(editTextNome.getText().toString()).setValue(usuario);
 
 
         auth.createUserWithEmailAndPassword(editTextEmail.getText().toString(),editTextSenha.getText().toString())
@@ -110,7 +113,9 @@ public class CadastroActivity extends AppCompatActivity {
                     String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmail());
                     FirebaseUser user =  task.getResult().getUser();
                     usuario.setId( identificadorUsuario );
- //                   usuario.salvar();
+          //          usuario.salvar();
+                    database.child("usuarios").child(identificadorUsuario).setValue(usuario);
+
                     abrirUsuarioLogado();
 
 //                    Preferencias preferencias = new Preferencias(CadastroActivity.this);
@@ -139,6 +144,5 @@ public class CadastroActivity extends AppCompatActivity {
         Intent intent =  new Intent(this,MainActivity.class);
         startActivity(intent);
         finish();
-
     }
 }

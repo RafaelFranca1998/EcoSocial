@@ -43,7 +43,12 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.MainActivity"
-            android:screenOrientation="portrait"></activity>
+            android:parentActivityName=".activity.TransitionActivity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.rafael_cruz.prototipo.activity.TransitionActivity" />
+        </activity>
         <!-- Splash screen -->
         <activity
             android:name=".activity.LoginActivity"
@@ -65,7 +70,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.CadastroActivity"></activity>
+        <activity android:name=".activity.CadastroActivity" />
+        <activity android:name=".activity.TransitionActivity" />
+
+        <service
+            android:name=".GeocoderService"
+            android:enabled="true"
+            android:exported="true">
+
+        </service>
     </application>
 
 </manifest>

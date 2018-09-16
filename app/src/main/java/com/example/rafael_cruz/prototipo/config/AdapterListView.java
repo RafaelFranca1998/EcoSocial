@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.rafael_cruz.prototipo.R;
+import com.example.rafael_cruz.prototipo.model.Eventos;
 
 import java.util.List;
 
@@ -18,24 +19,22 @@ import java.util.List;
  */
 public class AdapterListView extends BaseAdapter {
     private LayoutInflater mInflater;
-    private List<ItemListView> itens;
+    private List<ItemEvento> itens;
     private Context context;
 
 
-    public AdapterListView( Context context, List<ItemListView> itens ) {
+    public AdapterListView( Context context, List<ItemEvento> itens ) {
         //Itens do listview
         this.itens = itens;
         //Objeto responsável por pegar o Layout do item.
         mInflater = LayoutInflater.from(context);
         this.context =  context;
-
-
     }
     @Override
     public int getCount() {
         return itens.size();
     }
-    public ItemListView getItem(int position) {
+    public ItemEvento getItem(int position) {
         return itens.get(position);
     }
     @Override
@@ -57,7 +56,7 @@ public class AdapterListView extends BaseAdapter {
             //cria um item de suporte para não precisarmos sempre
             //inflar as mesmas informacoes
             itemHolder = new ItemSuporte();
-            itemHolder.txtDescricao = ((TextView) view.findViewById(R.id.text));
+            itemHolder.txtDescricao = ((TextView) view.findViewById(R.id.text_descricao_list));
             itemHolder.txtLocalidade = view.findViewById(R.id.text_localidade);
             itemHolder.imgIcon = ((ImageView) view.findViewById(R.id.imagemview));
 
@@ -70,9 +69,9 @@ public class AdapterListView extends BaseAdapter {
 
         //pega os dados da lista
         //e define os valores nos itens.
-        ItemListView item = itens.get(position);
-        itemHolder.txtDescricao.setText(item.getTextoDescricao());
-        itemHolder.txtLocalidade.setText(item.getTextoLocalidade());
+        ItemEvento item = itens.get(position);
+        itemHolder.txtDescricao.setText(item.getTipoEvento());
+        itemHolder.txtLocalidade.setText(item.getLocal());
         itemHolder.imgIcon.setImageResource(item.getIconeRid());
 
         //retorna a view com as informações

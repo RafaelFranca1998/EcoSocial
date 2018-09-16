@@ -13,9 +13,10 @@ public class Preferencias {
     private int                         MODE = 0;
     private SharedPreferences.Editor    editor;
     //Chaves finais
-    private String CHAVE_NOME      = "tipoEvento";
-    private String CHAVE_TELEFONE  = "";
-    private String CHAVE_TOKEN     = "token";
+    private String CHAVE_NOME       = "tipoEvento";
+    private String CHAVE_EMAIL      = "email";
+    private String CHAVE_SENHA      = "senha";
+    private String CHAVE_IDENTIFICADOR      = "identificador";
 
 
     public Preferencias(Context contextoParametro) {
@@ -24,21 +25,26 @@ public class Preferencias {
         editor      = preferences.edit();
     }
 
-    public void salvarUsuarioPreferences(String nome, String telefone, String token){
-
+    public void salvarDados(String nome, String email, String senha){
         editor.putString(CHAVE_NOME,nome        );
-        editor.putString(CHAVE_TELEFONE,telefone);
-        editor.putString(CHAVE_TOKEN,token      );
+        editor.putString(CHAVE_EMAIL,email);
+        editor.putString(CHAVE_SENHA,senha      );
         editor.commit();
-
     }
 
     public HashMap<String,String> getDadosUsuario(){
         HashMap<String,String> dadosUsuario =  new HashMap<>();
         dadosUsuario.put        (CHAVE_NOME,preferences.getString(CHAVE_NOME,null));
-        dadosUsuario.put(CHAVE_TELEFONE,preferences.getString(CHAVE_TELEFONE,null));
-        dadosUsuario.put      (CHAVE_TOKEN,preferences.getString(CHAVE_TOKEN,null));
+        dadosUsuario.put(CHAVE_EMAIL,preferences.getString(CHAVE_EMAIL,null));
+        dadosUsuario.put      (CHAVE_SENHA,preferences.getString(CHAVE_SENHA,null));
         return dadosUsuario;
+    }
+
+    public String getNome(){
+        return preferences.getString(CHAVE_NOME, null);
+    }
+    public String getEmail(){
+        return preferences.getString(CHAVE_EMAIL, null);
     }
 
 

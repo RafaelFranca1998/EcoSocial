@@ -1,5 +1,5 @@
 package com.example.rafael_cruz.prototipo.config;
-
+@Deprecated
 public class ItemListView {
 
     private String textoDescricao,textoLocalidade;

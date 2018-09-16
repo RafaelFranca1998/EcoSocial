@@ -121,4 +121,9 @@
     <string name="senha_text">Senha</string>
     <string name="e_mail_text">E-mail</string>
     <string name="nome_text">Nome</string>
+    <string name="service_not_available">Serviço não disponivel</string>
+    <string name="invalid_lat_long_used">Lat ou lng inválidos</string>
+    <string name="no_address_found">Endereço não encontrado</string>
+    <string name="address_found">Endereço encontrado</string>
+    <string name="no_geocoder_available">Geocoder não disponivel</string>
 </resources>
