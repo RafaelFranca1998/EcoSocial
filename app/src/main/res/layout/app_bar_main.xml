@@ -17,16 +17,14 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:minHeight="?attr/actionBarSize"
-            app:titleTextColor="@color/Branco"
-            app:popupTheme="@style/ToolbarTheme"/>
+            app:popupTheme="@style/ToolbarTheme"
+            app:titleTextColor="@color/Branco" />
 
     </android.support.design.widget.AppBarLayout>
 
     <include
-        android:id="@+id/include"
         layout="@layout/content_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
 
 </LinearLayout>

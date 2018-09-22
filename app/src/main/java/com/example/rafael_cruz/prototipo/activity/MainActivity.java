@@ -3,19 +3,15 @@ package com.example.rafael_cruz.prototipo.activity;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.ResultReceiver;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
@@ -31,23 +27,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.rafael_cruz.prototipo.GeocoderService;
 import com.example.rafael_cruz.prototipo.R;
 import com.example.rafael_cruz.prototipo.config.DAO;
 import com.example.rafael_cruz.prototipo.config.Preferencias;
 import com.example.rafael_cruz.prototipo.fragments.AboutFragment;
-import com.example.rafael_cruz.prototipo.fragments.AddEventFragment;
 import com.example.rafael_cruz.prototipo.fragments.MainFragment;
 import com.example.rafael_cruz.prototipo.fragments.MapsFragment;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, LocationListener{
-    NavigationView navigationView;
-    Toolbar toolbar;
+        implements NavigationView.OnNavigationItemSelectedListener, LocationListener {
+    private NavigationView navigationView;
+    private static Toolbar toolbar;
     public static LocationManager locationManager;
     public static String provider;
     private FirebaseAuth auntenticacao;
@@ -57,8 +48,6 @@ public class MainActivity extends AppCompatActivity
     public static boolean isInFragment = false;
     //atributo da classe.
     private AlertDialog alerta;
-    //atributos do servico
-    protected Location mLastLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,12 +61,12 @@ public class MainActivity extends AppCompatActivity
         //-----------------------------NAVIGATION VIEW------------------------
         navigationView = findViewById(R.id.nav_view);
         navigationView.setCheckedItem(R.id.nav_principal);
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         //---------------------------------------------------------------------
         // Get the location manager
@@ -86,7 +75,16 @@ public class MainActivity extends AppCompatActivity
         // default
         Criteria criteria = new Criteria();
         provider = locationManager.getBestProvider(criteria, false);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         Location location = locationManager.getLastKnownLocation(provider);
@@ -110,17 +108,27 @@ public class MainActivity extends AppCompatActivity
         if (verificarUsuarioLogado()) {
             //TODO Resolvido: não consigo setar o nome do usuario
             Preferencias preferencias = new Preferencias(MainActivity.this);
-            txtLogin.setText("");
+            txtLogin.setText("Sair");
             txtEmail.setText(preferencias.getEmail());
-            txtNome.setText(preferencias.getNome());
+            txtNome.setText(preferencias.getNome()+" "+preferencias.getSobrenome());
+            txtLogin.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    auntenticacao =  DAO.getFirebaseAutenticacao();
+                    auntenticacao.signOut();
+                    Intent intent = new Intent(MainActivity.this,TransitionActivity.class);
+                    startActivity(intent);
+                }
+            });
         } else {
-//            textViewUsuarioNome.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    Intent intent =  new Intent(MainActivity.this,LoginActivity.class);
-//                    startActivity(intent);
-//                }
-//            });
+            txtLogin.setText("Fazer Login");
+            txtLogin.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent =  new Intent(MainActivity.this,LoginActivity.class);
+                    startActivity( intent );
+                }
+            });
         }
 
         //-----------------------------INICIA FRAGMENT------------------------
@@ -132,23 +140,19 @@ public class MainActivity extends AppCompatActivity
         fragmentTransaction.commit();
     }
 
-
-
-
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (isFinsihActivity == true && isInFragment == false){
-            abrirDialog();
+            abrirDialogSair();
         } else if (isInFragment){
             super.onBackPressed();
         }
     }
 
-    private void abrirDialog() {
+    private void abrirDialogSair() {
         //Cria o gerador do AlertDialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         //define o titulo
@@ -160,6 +164,33 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface arg0, int arg1) {
                 Toast.makeText(MainActivity.this, "positivo=" + arg1, Toast.LENGTH_SHORT).show();
                 finishAffinity();
+            }
+        });
+        //define um botão como negativo.
+        builder.setNegativeButton("Não", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+                Toast.makeText(MainActivity.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
+            }
+        });
+        //cria o AlertDialog
+        alerta = builder.create();
+        //Exibe
+        alerta.show();
+    }
+
+    private void abrirDialogLogar() {
+        //Cria o gerador do AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        //define o titulo
+        builder.setTitle("Para Adicionar um caso é preciso estar logado");
+        //define a mensagem
+        builder.setMessage("Fazer login?");
+        //define um botão como positivo
+        builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+                Toast.makeText(MainActivity.this, "positivo=" + arg1, Toast.LENGTH_SHORT).show();
+                Intent intent =  new Intent(MainActivity.this,LoginActivity.class);
+                startActivity(intent);
             }
         });
         //define um botão como negativo.
@@ -226,16 +257,18 @@ public class MainActivity extends AppCompatActivity
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
         } else if (id == R.id.nav_marcar_evento) {
-            AddEventFragment fragment= new AddEventFragment();
-            android.support.v4.app.FragmentTransaction fragmentTransaction =
-                    getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, fragment);
-            fragmentTransaction.commit();
-            setToolbarTitle("Adicionar Evento");
-
-
-//            Intent intent =  new Intent(this,AddEventActivity.class);
-//            startActivity(intent);
+            if (verificarUsuarioLogado()) {
+//                AddEventFragment fragment = new AddEventFragment();
+//                android.support.v4.app.FragmentTransaction fragmentTransaction =
+//                        getSupportFragmentManager().beginTransaction();
+//                fragmentTransaction.replace(R.id.fragment_container, fragment);
+//                fragmentTransaction.commit();
+//                setToolbarTitle("Adicionar Evento");
+                Intent intent = new Intent(MainActivity.this, AddEventActivity.class);
+                startActivity(intent);
+            } else {
+                abrirDialogLogar();
+            }
         } else if (id == R.id.nav_login){
             Intent intent =  new Intent(this,LoginActivity.class);
             startActivity(intent);
@@ -255,7 +288,7 @@ public class MainActivity extends AppCompatActivity
      * Usado para modificar o titulo na barra de titulo.
      * @param title
      */
-    public void setToolbarTitle(String title){
+    public static void setToolbarTitle(String title){
         if (toolbar != null) {
             toolbar.setTitle(title);
         }
@@ -308,11 +341,4 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(this, "Disabled provider " + provider,
                 Toast.LENGTH_SHORT).show();
     }
-    //abre a tela de login
-    public void abrir_login(View view){
-        Intent intent = new Intent(MainActivity.this,LoginActivity.class);
-        startActivity(intent);
-    }
-
-
 }

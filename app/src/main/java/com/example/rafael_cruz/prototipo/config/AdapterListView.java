@@ -1,7 +1,10 @@
 package com.example.rafael_cruz.prototipo.config;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,58 +12,69 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.rafael_cruz.prototipo.R;
 import com.example.rafael_cruz.prototipo.model.Eventos;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
 /**
- * Classe adaptador Customizada
+ * Classe adaptador Customizada.
  */
 public class AdapterListView extends BaseAdapter {
-    private LayoutInflater mInflater;
-    private List<ItemEvento> itens;
+    private List<Eventos> itens;
     private Context context;
 
-
-    public AdapterListView( Context context, List<ItemEvento> itens ) {
-        //Itens do listview
+    public AdapterListView( Context context, List<Eventos> itens ) {
+        //Itens do listview.
         this.itens = itens;
         //Objeto responsável por pegar o Layout do item.
-        mInflater = LayoutInflater.from(context);
         this.context =  context;
     }
+
+    public Eventos getItem(int position) {
+        return itens.get(position);
+    }
+
     @Override
     public int getCount() {
         return itens.size();
     }
-    public ItemEvento getItem(int position) {
-        return itens.get(position);
-    }
+
     @Override
     public long getItemId(int position) {
         return position;
     }
+
+    @SuppressLint("InflateParams")
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         ItemSuporte itemHolder;
-        //se a view estiver nula (nunca criada), inflamos o layout nela.
+        //se a view estiver nula (nunca criada), inflamos o layout nela (Singleton).
         if (view == null) {
-            //infla o layout para podermos pegar as views
-            //view = mInflater.inflate(R.layout.item_list, null);
+            //infla o layout para podermos pegar as views.
             LayoutInflater mInflater = (LayoutInflater)
-            context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-            view = mInflater.inflate(R.layout.item_list, null);
+                    context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+            try {
+                assert mInflater != null;
+                view = mInflater.inflate(R.layout.item_list, null);
+            } catch (NullPointerException e){
+                e.printStackTrace();
+            }
 
 
             //cria um item de suporte para não precisarmos sempre
-            //inflar as mesmas informacoes
+            //inflar as mesmas informacoes.
             itemHolder = new ItemSuporte();
-            itemHolder.txtDescricao = ((TextView) view.findViewById(R.id.text_descricao_list));
+            assert view != null;
+            itemHolder.txtDescricao = (view.findViewById(R.id.text_descricao_list));
             itemHolder.txtLocalidade = view.findViewById(R.id.text_localidade);
-            itemHolder.imgIcon = ((ImageView) view.findViewById(R.id.imagemview));
+            itemHolder.imgIcon = (view.findViewById(R.id.imagemview_list));
 
-            //define os itens na view;
+            //define os itens na view.
             view.setTag(itemHolder);
         } else {
             //se a view já existe pega os itens.
@@ -69,10 +83,18 @@ public class AdapterListView extends BaseAdapter {
 
         //pega os dados da lista
         //e define os valores nos itens.
-        ItemEvento item = itens.get(position);
+        Eventos item = itens.get(position);
+        //itemHolder.imgIcon.setImageResource(item.getIconeRid());
         itemHolder.txtDescricao.setText(item.getTipoEvento());
         itemHolder.txtLocalidade.setText(item.getLocal());
-        itemHolder.imgIcon.setImageResource(item.getIconeRid());
+        //baixa imagem do datastore
+        Log.i("URL FOTO ADAPTER", item.getImgDownload());
+        String url = item.getImgDownload();
+        StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(url);
+        //storageReference.toString();
+        Glide.with(context).using(new FirebaseImageLoader())
+                .load(storageReference)
+                .into(itemHolder.imgIcon);
 
         //retorna a view com as informações
         return view;

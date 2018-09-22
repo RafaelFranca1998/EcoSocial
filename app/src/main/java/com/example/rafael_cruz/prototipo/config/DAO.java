@@ -6,10 +6,14 @@ import android.util.Log;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class DAO {
     private static DatabaseReference referenciaFirebase;
     private static FirebaseAuth autenticacao;
+    private static StorageReference storage;
+
 
     public DAO() {
     }
@@ -28,7 +32,14 @@ public class DAO {
         return autenticacao;
     }
 
-//    public void criaEvento(Eventos eventos){
+    public static StorageReference getFirebaseStorage() {
+        if (storage == null){
+         storage = FirebaseStorage.getInstance().getReference();
+        }
+        return storage;
+    }
+
+    //    public void criaEvento(Eventos eventos){
 //        referenciaFirebase.child("eventos").child(String.valueOf(Eventos.getDataCriacao())).child(String.valueOf(Eventos.getSerialNumber())).setValue(eventos);
 //    }
 //

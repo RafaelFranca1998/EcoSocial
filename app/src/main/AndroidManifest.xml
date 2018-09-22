@@ -16,6 +16,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -37,10 +38,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity
-            android:name=".activity.AddEventActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait" />
         <activity
             android:name=".activity.MainActivity"
             android:parentActivityName=".activity.TransitionActivity"
@@ -76,9 +73,13 @@
         <service
             android:name=".GeocoderService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true" />
 
-        </service>
+        <activity android:name=".activity.InfoEventoActivity" />
+        <activity
+            android:name=".activity.AddEventActivity"
+            android:parentActivityName=".activity.MainActivity"></activity>
+        <activity android:name=".activity.AccountActivity"></activity>
     </application>
 
 </manifest>

@@ -1,7 +1,7 @@
 package com.example.rafael_cruz.prototipo.model;
 
 public class Usuario {
-    String nome, telefone, email,senha,id;
+    String nome,sobreNome, telefone, email,senha,id;
 
     public String getId() {
         return id;
@@ -17,6 +17,14 @@ public class Usuario {
 
     public void setNome(String nome) {
         this.nome = nome;
+    }
+
+    public String getSobreNome() {
+        return sobreNome;
+    }
+
+    public void setSobreNome(String sobreNome) {
+        this.sobreNome = sobreNome;
     }
 
     public String getTelefone() {

@@ -1,5 +1,6 @@
 package com.example.rafael_cruz.prototipo.model;
 
+import android.net.Uri;
 import android.util.Log;
 
 import java.util.Calendar;
@@ -8,8 +9,9 @@ public class Eventos {
 
     private String data,horario;
     static int dataCriacao,iconeRid;
-    private String tipoEvento,local,descricao;
+    private String tipoEvento,local,descricao,idUsuario,eventId, autorEmail;
     private double lat,lon;
+    private String imgDownload;
 
 
     public String getData() {
@@ -72,7 +74,13 @@ public class Eventos {
         return dataCriacao;
     }
 
+    public String getIdUsuario() {
+        return idUsuario;
+    }
 
+    public void setIdUsuario(String idUsuario) {
+        this.idUsuario = idUsuario;
+    }
 
     public void setDataCriacao(int dataCriacao) {
         this.dataCriacao = dataCriacao;
@@ -80,23 +88,61 @@ public class Eventos {
 
 
     public Eventos() {
+       this("","","","","","","",-13.003257,-38.523767,-1);
+        data = "";
+        horario= "";
+        tipoEvento = "";
+        local = "";
+        descricao = "";
+        idUsuario = "";
+        eventId = "";
+        lat = -13.003257;
+        lon = -38.523767;
+        iconeRid = 0;
     }
 
-    public Eventos(String data, String horario, String tipoEvento, String local, String descricao, double lat, double lon) {
+    public Eventos(String data, String horario, String tipoEvento, String local, String descricao, String idUsuario, String eventId, double lat, double lon,int iconeRid) {
         this.data = data;
         this.horario = horario;
         this.tipoEvento = tipoEvento;
         this.local = local;
         this.descricao = descricao;
+        this.idUsuario = idUsuario;
+        this.eventId = eventId;
         this.lat = lat;
         this.lon = lon;
+        this.iconeRid = iconeRid;
     }
 
-    public static int getIconeRid() {
+    public String getImgDownload() {
+        return imgDownload;
+    }
+
+    public void setImgDownload(String imgDownload) {
+        this.imgDownload = imgDownload;
+    }
+
+    public String getAutorEmail() {
+        return autorEmail;
+    }
+
+    public void setAutorEmail(String autorEmail) {
+        this.autorEmail = autorEmail;
+    }
+
+    public int getIconeRid() {
         return iconeRid;
     }
 
-    public static void setIconeRid(int iconeRid) {
+    public void setIconeRid(int iconeRid) {
         Eventos.iconeRid = iconeRid;
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
     }
 }

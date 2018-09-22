@@ -3,25 +3,40 @@ package com.example.rafael_cruz.prototipo.fragments;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.rafael_cruz.prototipo.R;
 import com.example.rafael_cruz.prototipo.activity.MainActivity;
+import com.example.rafael_cruz.prototipo.config.DAO;
+import com.example.rafael_cruz.prototipo.config.ItemEvento;
+import com.example.rafael_cruz.prototipo.model.Eventos;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -32,6 +47,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     int REQUEST_LOCATION;
     MapView mMapView;
     private static GoogleMap googleMap;
+    List<Marker> markerList;
+    LocationManager locationManager;
+    Location mLocation;
+    Double latitude, longitude;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,24 +76,59 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 googleMap = mMap;
 
                 // For showing a move to my location button
-                populateMap();
                 // For dropping a marker at a point on the Map
-                LatLng salvador = new LatLng(-12.999998, -38.493746);
-                googleMap.addMarker(new MarkerOptions().position(salvador).title("Coleta de Lixo")
-                                                            .snippet("Local: Sua casa \n Horario: o dia todo ").draggable(true));
 
-                LatLng ribeira =  new LatLng(-12.921654, -38.511641);
-                googleMap.addMarker(new MarkerOptions().position(ribeira).title("Coleta de Lixo")
-                                                        .snippet("Local: Rua Arthur Matos \n Horario: 15:20"));
 
-                LatLng cachoroPerdido =  new LatLng(-12.999212, -38.499147);
-                googleMap.addMarker(new MarkerOptions().position(cachoroPerdido).title("Cachorro Perdido")
-                                                            .snippet("Local: Rua Sergio de Carvalho \n Horario: Dia todo"));
+                markerList = new ArrayList<>();
+                DatabaseReference databaseReference = DAO.getFireBase().child("events");
+                final ValueEventListener valueEventListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        markerList.clear();
+                        for (DataSnapshot data : dataSnapshot.getChildren()) {
+                            Eventos eventos = data.getValue(Eventos.class);
+                            BitmapDescriptor bitmapDescriptor;
+                            if (eventos.getTipoEvento().equals("Animal Perdido")) {
+                                bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.dog_marker);
+                            } else {
+                                bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.trash_marker);
+                            }
+                            LatLng latLng = new LatLng(eventos.getLat(), eventos.getLon());
+                            Marker marker = googleMap.addMarker(new MarkerOptions().position(latLng)
+                                    .title(eventos.getTipoEvento()).snippet(eventos.getLocal()).icon(bitmapDescriptor));
+                            markerList.add(marker);
+                        }
+                    }
 
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                };
+                databaseReference.addValueEventListener(valueEventListener);
+
+                locationManager = MainActivity.locationManager;
+                if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+                mLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                if (mLocation != null) {
+                    latitude = mLocation.getLatitude();
+                    longitude = mLocation.getLongitude();
+                    Log.i("Debug", "Latitude:" + latitude + "\n Longitude:" + longitude);
+                }else {
+                    latitude = -12.963004;
+                    longitude =  -38.476432;
+                }
+                LatLng salvador = new LatLng(latitude, longitude);
 
                 // For zooming automatically to the location of the marker
-                CameraPosition cameraPosition = new CameraPosition.Builder().target(ribeira).zoom(12).build();
+                CameraPosition cameraPosition = new CameraPosition.Builder().target(salvador).zoom(12).build();
                 googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+
             }
         });
 
@@ -128,15 +182,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         // For zooming automatically to the location of the marker
         CameraPosition cameraPosition = new CameraPosition.Builder().target(sydney).zoom(12).build();
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-    }
-
-    private void populateMap(){
-        final LatLng MELBOURNE = new LatLng(-37.813, 144.962);
-        Marker melbourne = googleMap.addMarker(new MarkerOptions()
-                .position(MELBOURNE)
-                .title("Melbourne")
-                .snippet("Population: 4,137,400")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_cachorro_perdido)));
     }
 
 }

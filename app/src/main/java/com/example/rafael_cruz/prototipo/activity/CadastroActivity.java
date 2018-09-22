@@ -1,6 +1,7 @@
 package com.example.rafael_cruz.prototipo.activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -34,9 +35,10 @@ public class CadastroActivity extends AppCompatActivity {
 
     private EditText editTextTelefone;
     private EditText editTextNome;
+    private EditText editTextSobrenome;
     private EditText editTextEmail;
     private EditText editTextSenha;
-    private Button   buttoncadastrar;
+    private Button buttoncadastrar;
     private DatabaseReference database;
     private FirebaseAuth auth;
 
@@ -49,11 +51,12 @@ public class CadastroActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro);
         //--------------------------CAMPOS DO FORM-----------------------------------------------------------------------------------------
-        editTextTelefone    = findViewById(R.id.editText_telefone);
-        editTextEmail       = findViewById(R.id.editText_email);
-        editTextNome        = findViewById(R.id.editText_nome);
-        editTextSenha       = findViewById(R.id.editText_senha);
-        buttoncadastrar     = findViewById(R.id.bt_cadastrar);
+        editTextTelefone = findViewById(R.id.editText_telefone);
+        editTextEmail = findViewById(R.id.editText_email);
+        editTextNome = findViewById(R.id.editText_nome);
+        editTextSobrenome = findViewById(R.id.editText_sobrenome);
+        editTextSenha = findViewById(R.id.editText_senha);
+        buttoncadastrar = findViewById(R.id.bt_cadastrar);
         //-----------------------------------MASCARA DE TEXTO--------------------------------------------------------------------------
         SimpleMaskFormatter simpleMasktelefone = new SimpleMaskFormatter("NN(NN)NNNNN-NNNN");
         MaskTextWatcher maskTel = new MaskTextWatcher(editTextTelefone, simpleMasktelefone);
@@ -64,6 +67,7 @@ public class CadastroActivity extends AppCompatActivity {
             public void onClick(View view) {
                 usuario = new Usuario();
                 usuario.setNome(editTextNome.getText().toString());
+                usuario.setSobreNome(editTextSobrenome.getText().toString());
                 usuario.setEmail(editTextEmail.getText().toString());
                 usuario.setSenha(editTextSenha.getText().toString());
                 cadastrar();
@@ -72,9 +76,10 @@ public class CadastroActivity extends AppCompatActivity {
 
         //Obtem numero do user
         TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS)
-                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_NUMBERS) !=
-                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        String numeroDoTelefone = "";
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_NUMBERS) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -82,12 +87,20 @@ public class CadastroActivity extends AppCompatActivity {
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_PHONE_NUMBERS},PackageManager.PERMISSION_GRANTED );
+            ActivityCompat.requestPermissions(CadastroActivity.this,
+                    new String[]{Manifest.permission.READ_SMS},
+                    0);
+            ActivityCompat.requestPermissions(CadastroActivity.this,
+                    new String[]{Manifest.permission.READ_PHONE_NUMBERS},
+                    0);
+            ActivityCompat.requestPermissions(CadastroActivity.this,
+                    new String[]{Manifest.permission.READ_PHONE_STATE},
+                    0);
             return;
         }
-        String numeroDoTelefone = tm.getLine1Number();
-        //-----------------------------------------------------------------------------------------------------------
+        //TODO me ajuda ai, não tá indo
+        numeroDoTelefone = tm.getLine1Number();
+//-----------------------------------------------------------------------------------------------------------
         editTextTelefone.setText(numeroDoTelefone);
     }
 
@@ -100,6 +113,7 @@ public class CadastroActivity extends AppCompatActivity {
         usuario =  new Usuario();
         usuario.setEmail(editTextEmail.getText().toString());
         usuario.setNome(editTextNome.getText().toString());
+        usuario.setSobreNome(editTextSobrenome.getText().toString());
         usuario.setTelefone(editTextTelefone.getText().toString());
 
 
@@ -113,13 +127,13 @@ public class CadastroActivity extends AppCompatActivity {
                     String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmail());
                     FirebaseUser user =  task.getResult().getUser();
                     usuario.setId( identificadorUsuario );
-          //          usuario.salvar();
                     database.child("usuarios").child(identificadorUsuario).setValue(usuario);
 
                     abrirUsuarioLogado();
 
-//                    Preferencias preferencias = new Preferencias(CadastroActivity.this);
-//                    preferencias.salvarDados( identificadorUsuario , usuario.getNome());
+                    Preferencias preferencias = new Preferencias(CadastroActivity.this);
+                    preferencias.salvarDados(usuario.getNome(),usuario.getSobreNome(),usuario.getEmail(),
+                            editTextSenha.getText().toString(),identificadorUsuario);
                 }else {
                     String erroExcecao = "";
                     try {

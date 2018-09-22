@@ -14,6 +14,7 @@ public class Preferencias {
     private SharedPreferences.Editor    editor;
     //Chaves finais
     private String CHAVE_NOME       = "tipoEvento";
+    private String CHAVE_SOBRENOME       = "sobrenome";
     private String CHAVE_EMAIL      = "email";
     private String CHAVE_SENHA      = "senha";
     private String CHAVE_IDENTIFICADOR      = "identificador";
@@ -25,10 +26,12 @@ public class Preferencias {
         editor      = preferences.edit();
     }
 
-    public void salvarDados(String nome, String email, String senha){
+    public void salvarDados(String nome,String sobrenome, String email, String senha,String id){
         editor.putString(CHAVE_NOME,nome        );
+        editor.putString(CHAVE_SOBRENOME,sobrenome);
         editor.putString(CHAVE_EMAIL,email);
         editor.putString(CHAVE_SENHA,senha      );
+        editor.putString(CHAVE_IDENTIFICADOR, id);
         editor.commit();
     }
 
@@ -45,6 +48,12 @@ public class Preferencias {
     }
     public String getEmail(){
         return preferences.getString(CHAVE_EMAIL, null);
+    }
+    public String getId(){
+        return preferences.getString(CHAVE_IDENTIFICADOR,null);
+    }
+    public String getSobrenome(){
+        return  preferences.getString(CHAVE_SOBRENOME,null);
     }
 
 

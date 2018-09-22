@@ -364,7 +364,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             Usuario usuarioRecuperado = dataSnapshot.getValue( Usuario.class );
                             Preferencias preferencias = new Preferencias(LoginActivity.this);
-                            preferencias.salvarDados( usuarioRecuperado.getNome(),usuarioRecuperado.getEmail(),usuarioRecuperado.getSenha() );
+                            preferencias.salvarDados( usuarioRecuperado.getNome(),usuarioRecuperado.getSobreNome(),usuarioRecuperado.getEmail(),usuarioRecuperado.getSenha(),usuarioRecuperado.getId() );
                         }
 
                         @Override

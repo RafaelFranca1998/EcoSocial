@@ -23,7 +23,7 @@
         android:orientation="vertical">
 
         <ImageView
-            android:id="@+id/imagemview"
+            android:id="@+id/imagemview_list"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_marginStart="10dp"

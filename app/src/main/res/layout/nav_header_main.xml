@@ -39,16 +39,17 @@
 
     <TextView
         android:id="@+id/usuario_nome_login"
-        android:layout_width="179dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="18dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="19dp"
+        android:layout_marginTop="47dp"
+        android:background="@drawable/background_text"
         android:clickable="true"
-        android:onClick="abrir_login"
         android:text="Fazer login"
         android:textAlignment="center"
         android:textColor="@color/Branco"
-        android:textSize="24sp" />
+        android:textSize="22sp" />
 
 </RelativeLayout>

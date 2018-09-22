@@ -5,17 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     tools:context=".activity.CadastroActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="50dp"
-        android:layout_marginEnd="20dp"
+        android:orientation="vertical"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="200dp"
-        android:orientation="vertical">
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="20dp"
+        tools:layout_editor_absoluteX="27dp"
+        tools:layout_editor_absoluteY="139dp">
 
         <TextView
             android:id="@+id/txt_nome"
@@ -36,6 +37,23 @@
             android:inputType="textPersonName"
             android:textColor="@color/Branco"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sobrenome"
+            android:textColor="@color/Branco" />
+
+        <EditText
+            android:id="@+id/editText_sobrenome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_text"
+            android:ems="10"
+            android:hint="Sobrenome"
+            android:inputType="textPersonName"
+            android:textColor="@color/Branco" />
 
         <TextView
             android:id="@+id/txt_telefone"
@@ -102,6 +120,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
             android:background="@color/primary_dark"
+
             android:elevation="10dp"
             android:text="Cadastrar"
             android:textAlignment="center"
