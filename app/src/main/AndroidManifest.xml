@@ -78,8 +78,11 @@
         <activity android:name=".activity.InfoEventoActivity" />
         <activity
             android:name=".activity.AddEventActivity"
-            android:parentActivityName=".activity.MainActivity"></activity>
-        <activity android:name=".activity.AccountActivity"></activity>
+            android:parentActivityName=".activity.MainActivity" />
+        <activity android:name=".activity.AccountActivity" />
+        <activity
+            android:name=".activity.SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
     </application>
 
 </manifest>

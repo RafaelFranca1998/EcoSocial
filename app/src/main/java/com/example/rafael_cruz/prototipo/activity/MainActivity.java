@@ -37,17 +37,24 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, LocationListener {
-    private NavigationView navigationView;
-    private static Toolbar toolbar;
+    private Toolbar toolbar;
     public static LocationManager locationManager;
     public static String provider;
     private FirebaseAuth auntenticacao;
+    private NavigationView navigationView;
     //caso estiver na atividade principal
     public static boolean isFinsihActivity = false;
     //caso estiver em um fragment
     public static boolean isInFragment = false;
     //atributo da classe.
     private AlertDialog alerta;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,14 +67,13 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         //-----------------------------NAVIGATION VIEW------------------------
         navigationView = findViewById(R.id.nav_view);
-        navigationView.setCheckedItem(R.id.nav_principal);
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setCheckedItem(R.id.nav_principal);
         //---------------------------------------------------------------------
         // Get the location manager
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -100,10 +106,10 @@ public class MainActivity extends AppCompatActivity
         View headerView = navigationView.getHeaderView(0);
 
         // Obtém a referência do nome do usuário e altera seu nome
-        TextView txtLogin = (TextView) headerView.findViewById(R.id.usuario_nome_login);
-        TextView txtEmail = (TextView) headerView.findViewById(R.id.textView_nav_header_email);
-        TextView txtNome = (TextView) headerView.findViewById(R.id.textview_nav_header_nome);
-        ImageView imageLogo = (ImageView) headerView.findViewById(R.id.imageViewLogo);
+        TextView txtLogin = headerView.findViewById(R.id.usuario_nome_login);
+        TextView txtEmail = headerView.findViewById(R.id.textView_nav_header_email);
+        TextView txtNome = headerView.findViewById(R.id.textview_nav_header_nome);
+        ImageView imageLogo = headerView.findViewById(R.id.imageViewLogo);
 
         if (verificarUsuarioLogado()) {
             //TODO Resolvido: não consigo setar o nome do usuario
@@ -145,7 +151,7 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (isFinsihActivity == true && isInFragment == false){
+        } else if (isFinsihActivity && !isInFragment){
             abrirDialogSair();
         } else if (isInFragment){
             super.onBackPressed();
@@ -220,19 +226,13 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-//            SettingsFragment fragment = new SettingsFragment();
-//            android.support.v4.app.FragmentTransaction fragmentTransaction =
-//                    getSupportFragmentManager().beginTransaction();
-//            fragmentTransaction.replace(R.id.fragment_container, fragment);
-//            fragmentTransaction.commit();
-            return true;
-        }else if (id == R.id.action_about){
+        if (id == R.id.action_about){
             AboutFragment fragment = new AboutFragment();
             android.support.v4.app.FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
+            setToolbarTitle("Sobre o Ecosocial");
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -250,35 +250,47 @@ public class MainActivity extends AppCompatActivity
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
         } else if (id == R.id.nav_eventos) {
-            MapsFragment fragment= new MapsFragment();
-            setToolbarTitle("Eventos");
-            android.support.v4.app.FragmentTransaction fragmentTransaction =
-                    getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, fragment);
-            fragmentTransaction.commit();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    MapsFragment fragment= new MapsFragment();
+                    setToolbarTitle("Eventos");
+                    android.support.v4.app.FragmentTransaction fragmentTransaction =
+                            getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.replace(R.id.fragment_container, fragment);
+                    fragmentTransaction.commit();
+                }
+            }).start();
+
         } else if (id == R.id.nav_marcar_evento) {
             if (verificarUsuarioLogado()) {
-//                AddEventFragment fragment = new AddEventFragment();
-//                android.support.v4.app.FragmentTransaction fragmentTransaction =
-//                        getSupportFragmentManager().beginTransaction();
-//                fragmentTransaction.replace(R.id.fragment_container, fragment);
-//                fragmentTransaction.commit();
-//                setToolbarTitle("Adicionar Evento");
-                Intent intent = new Intent(MainActivity.this, AddEventActivity.class);
-                startActivity(intent);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(MainActivity.this, AddEventActivity.class);
+                        startActivity(intent);
+                    }
+                }).start();
             } else {
                 abrirDialogLogar();
             }
-        } else if (id == R.id.nav_login){
-            Intent intent =  new Intent(this,LoginActivity.class);
-            startActivity(intent);
+        } else if (id == R.id.nav_account){
+            if (verificarUsuarioLogado()){
+                Intent intent = new Intent(MainActivity.this,AccountActivity.class);
+                startActivity(intent);
+            } else {
+                Intent intent =  new Intent(this,LoginActivity.class);
+                startActivity(intent);
+            }
+
         }else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
 
         }
 
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        DrawerLayout drawer;
+        drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -287,8 +299,9 @@ public class MainActivity extends AppCompatActivity
     /**
      * Usado para modificar o titulo na barra de titulo.
      * @param title
+     *
      */
-    public static void setToolbarTitle(String title){
+    public void setToolbarTitle(String title){
         if (toolbar != null) {
             toolbar.setTitle(title);
         }
@@ -296,11 +309,7 @@ public class MainActivity extends AppCompatActivity
 
     private boolean verificarUsuarioLogado(){
         auntenticacao =  DAO.getFirebaseAutenticacao();
-        if (auntenticacao.getCurrentUser() != null){
-            return  true;
-            //       abrirTelaPrincipal();
-        }
-        return false;
+        return auntenticacao.getCurrentUser() != null;
     }
 
     @Override
@@ -311,6 +320,7 @@ public class MainActivity extends AppCompatActivity
             return;
         }
         locationManager.requestLocationUpdates(provider, 400, 1, this);
+        navigationView.setCheckedItem(R.id.nav_principal);
     }
 
     @Override
@@ -321,8 +331,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLocationChanged(Location location) {
-        int lat = (int) (location.getLatitude());
-        int lng = (int) (location.getLongitude());
+
     }
 
     @Override
@@ -341,4 +350,5 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(this, "Disabled provider " + provider,
                 Toast.LENGTH_SHORT).show();
     }
+
 }

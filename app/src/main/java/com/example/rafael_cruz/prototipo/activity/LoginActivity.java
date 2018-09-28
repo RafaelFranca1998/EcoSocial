@@ -117,6 +117,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 usuario.setSenha(mPasswordView.getText().toString());
                 // validarLogin();
                 attemptLogin();
+
             }
         });
 

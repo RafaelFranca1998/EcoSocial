@@ -115,8 +115,7 @@ public class CadastroActivity extends AppCompatActivity {
         usuario.setNome(editTextNome.getText().toString());
         usuario.setSobreNome(editTextSobrenome.getText().toString());
         usuario.setTelefone(editTextTelefone.getText().toString());
-
-
+        usuario.setLinkImgAccount("gs://ecossocial-2c0dc.appspot.com/images/account/"+Base64Custom.codificarBase64(usuario.getEmail())+"/image_account.png");
         auth.createUserWithEmailAndPassword(editTextEmail.getText().toString(),editTextSenha.getText().toString())
                 .addOnCompleteListener(CadastroActivity.this, new OnCompleteListener<AuthResult>() {
             @Override

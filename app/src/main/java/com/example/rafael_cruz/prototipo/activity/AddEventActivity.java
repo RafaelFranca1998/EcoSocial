@@ -15,7 +15,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -31,7 +30,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
-import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -52,6 +51,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
@@ -72,29 +72,32 @@ public class AddEventActivity extends AppCompatActivity implements
 
     //------------------------------------------MAP-------------------------------------------------
     private int REQUEST_LOCATION;
-    private MapView mMapView;
+    private static MapView mMapView;
     private static GoogleMap mGoogleMap;
-    private Location mLocation;
-    private Double latitude,longitude, lat, lng;
+    private static Location mLocation;
+    private static Double latitude,longitude, lat, lng;
     private static LatLng position;
     private LocationManager locationManager;
     private GoogleMap.OnCameraIdleListener onCameraIdleListener;
     private String provider;
-    private LatLng salvador;
+    private static LatLng salvador;
     private static LatLng latLng;
     private List<Address> addresses;
     private Geocoder geocoder;
+    private static Marker marker;
     //-------------------------------------------VIEWS----------------------------------------------
     private Eventos eventos;
     private Button buttonAvancar;
     private Button btCompartilhar;
+    private TextView tvCaminho;
     private RadioGroup radioGroup;
     private String tipoevento;
     private String idUsuario;
-    private Switch aSwitchSemlimitetempo;
+    String country;
+    String locality;
     private static EditText editTextData;
     private static EditText editTextHora;
-    private static int year_x, month_x, day_x, hour_x, minute_x, hora;
+    private static int year_x, month_x, day_x, hour_x, minute_x;
     private static String local;
     private String linkDownload;
     private DatabaseReference database;
@@ -107,16 +110,10 @@ public class AddEventActivity extends AppCompatActivity implements
     private DatePickerDialog.OnDateSetListener date;
     private TimePickerDialog.OnTimeSetListener time;
     //----------------------------------------------------------------------------------------------
-    Uri localImagemSelecionada;
-
+    private static Uri localImagemSelecionada;
     FragmentManager fragmentManager;
-
-
-
-
     Toolbar toolbar;
     ProgressBar mProgressBar;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,15 +130,13 @@ public class AddEventActivity extends AppCompatActivity implements
         Preferencias preferencias =  new Preferencias(this);
         idUsuario = preferencias.getId();
 
-
+        tvCaminho = findViewById(R.id.txt_caminho_imagem);
         btCompartilhar = findViewById(R.id.bt_upload);
         radioGroup = findViewById(R.id.radioGroup);
         buttonAvancar = findViewById(R.id.button_adicionar_evento);
-        aSwitchSemlimitetempo = findViewById(R.id.switch_sem_limite_tempo);
         editTextData = findViewById(R.id.edit_text_data_2);
         editTextHora = findViewById(R.id.edit_text_hora);
         fragmentManager = getSupportFragmentManager();
-
         //------------------------------------------------------------------------------------------
         final Calendar calendar = Calendar.getInstance();
         year_x = calendar.get(Calendar.YEAR);
@@ -168,7 +163,7 @@ public class AddEventActivity extends AppCompatActivity implements
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 myCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                 myCalendar.set(Calendar.MINUTE, minute);
-                updateLabelData();
+                updateLabelHora();
             }
         };
 
@@ -189,7 +184,6 @@ public class AddEventActivity extends AppCompatActivity implements
                 new TimePickerDialog(AddEventActivity.this,time,myCalendar
                         .get(Calendar.HOUR_OF_DAY),myCalendar
                         .get(Calendar.MINUTE),true).show();
-                updateLabelHora();
             }
         });
 
@@ -203,7 +197,7 @@ public class AddEventActivity extends AppCompatActivity implements
         buttonAvancar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addEvento();
+                enviarFoto();
             }
         });
 
@@ -212,32 +206,15 @@ public class AddEventActivity extends AppCompatActivity implements
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.radio_button_animal_perdido) {
                     tipoevento = "Animal Perdido";
+                    editTextHora.setEnabled(false);
                     Toast.makeText(AddEventActivity.this, "Animal", Toast.LENGTH_LONG).show();
                 } else if (checkedId == R.id.radio_button_coleta_de_lixo) {
                     tipoevento = "Coleta de lixo";
+                    editTextHora.setEnabled(true);
                     Toast.makeText(AddEventActivity.this, "Coleta", Toast.LENGTH_LONG).show();
                 }
             }
         });
-
-
-        aSwitchSemlimitetempo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (aSwitchSemlimitetempo.isActivated()) {
-                    Log.i("if", String.valueOf(aSwitchSemlimitetempo.isActivated()));
-                    editTextHora.setEnabled(false);
-                    hora = 0000;
-                    editTextData.setText(hora);
-                } else {
-                    Log.i("else", String.valueOf(aSwitchSemlimitetempo.isActivated()));
-                    editTextHora.setEnabled(true);
-                    editTextHora.setText("0000");
-                    hora = Integer.parseInt(editTextHora.getText().toString().replace(":", ""));
-                }
-            }
-        });
-
 
         // todo inicializa o mapa
         mMapView = findViewById(R.id.mapView2);
@@ -264,9 +241,7 @@ public class AddEventActivity extends AppCompatActivity implements
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                     REQUEST_LOCATION);
-        } else {
         }
-
         try {
             MapsInitializer.initialize(AddEventActivity.this);
         } catch (Exception e) {
@@ -289,9 +264,7 @@ public class AddEventActivity extends AppCompatActivity implements
                 } else {
                     mGoogleMap.setMyLocationEnabled(true);
                 }
-//                locationManager = (LocationManager)getActivity().getSystemService(provider);
                 locationManager = MainActivity.locationManager;
-//                locationListener.onLocationChanged(mLocation);
                 mLocation = locationManager.getLastKnownLocation(provider);
                 if (mLocation != null) {
                     latitude = mLocation.getLatitude();
@@ -300,11 +273,8 @@ public class AddEventActivity extends AppCompatActivity implements
                 }
 
                 // For showing a move to my location button
-
-
                 // For dropping a marker at a point on the Map
                 //todo verificação lat/lng
-
                 try {
                     salvador = new LatLng(latitude, longitude);
                 } catch (NullPointerException e) {
@@ -314,26 +284,45 @@ public class AddEventActivity extends AppCompatActivity implements
                     salvador = new LatLng(-13.003257, -38.523767);
                     e.printStackTrace();
                 }
+                if (marker == null) {
+                    marker = mGoogleMap.addMarker(new MarkerOptions()
+                            .position(salvador)
+                            .title("Clique e arraste")
+                            .draggable(true));
+                    // For zooming automatically to the location of the marker
+                    CameraPosition cameraPosition = new CameraPosition.Builder()
+                            .target(salvador).zoom(12)
+                            .build();
+                    mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                } else {
+                    mGoogleMap.addMarker(new MarkerOptions().position(marker.getPosition())
+                            .title(marker.getTitle())
+                            .draggable(true));
+                    // For zooming automatically to the location of the marker
+                    CameraPosition cameraPosition = new CameraPosition.Builder()
+                            .target(marker.getPosition())
+                            .zoom(12).build();
+                    mGoogleMap.animateCamera(CameraUpdateFactory
+                            .newCameraPosition(cameraPosition));
+                }
 
-                final Marker marker = mGoogleMap.addMarker(new MarkerOptions().position(salvador).title("Clique e arraste").draggable(true));
-
-                // For zooming automatically to the location of the marker
-                CameraPosition cameraPosition = new CameraPosition.Builder().target(salvador).zoom(12).build();
-                mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 
                 mGoogleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
                     @Override
                     public void onCameraIdle() {
-                        latLng = mGoogleMap.getCameraPosition().target;
+                        //latLng = mGoogleMap.getCameraPosition().target;
                         geocoder = new Geocoder(AddEventActivity.this);
-                        
+
                         try {
                             List<Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
                             if (addressList != null && addressList.size() > 0) {
                                 String locality = addressList.get(0).getAddressLine(0);
                                 String country = addressList.get(0).getCountryName();
-                                marker.setPosition(latLng);
+                               // marker.setPosition(latLng);
+                                position = marker.getPosition();
+                                lat = position.latitude;
+                                lng = position.longitude;
                                 if (!locality.isEmpty() && !country.isEmpty()) {
                                     salvador = new LatLng(latLng.latitude, latLng.longitude);
                                     Log.i("Local_Debug: " ,locality + "  " + country);
@@ -345,33 +334,42 @@ public class AddEventActivity extends AppCompatActivity implements
                     }
                 });
 
-                mGoogleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
-                    @Override
-                    public void onMarkerDragStart(Marker marker) {
-                        // Here your code
-                        Toast.makeText(AddEventActivity.this, "Dragging Start",
-                                Toast.LENGTH_SHORT).show();
-                    }
 
+                mGoogleMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
                     @Override
-                    public void onMarkerDrag(Marker marker) {
-                        // Toast.makeText(MainActivity.this, "Dragging",
-                        // Toast.LENGTH_SHORT).show();
-                        System.out.println("Draagging");
-                    }
-
-                    @Override
-                    public void onMarkerDragEnd(Marker marker) {
-                        position = marker.getPosition(); //
-                        Toast.makeText(
-                                AddEventActivity.this,
-                                "Lat " + position.latitude + " "
-                                        + "Long " + position.longitude,
-                                Toast.LENGTH_LONG).show();
-                        lat = position.latitude;
-                        lng = position.longitude;
+                    public void onCameraMove() {
+                        latLng = mGoogleMap.getCameraPosition().target;
+                        marker.setPosition(latLng);
                     }
                 });
+
+//                mGoogleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+//                    @Override
+//                    public void onMarkerDragStart(Marker marker) {
+//                        // Here your code
+//                        Toast.makeText(AddEventActivity.this, "Dragging Start",
+//                                Toast.LENGTH_SHORT).show();
+//                    }
+//
+//                    @Override
+//                    public void onMarkerDrag(Marker marker) {
+//                        // Toast.makeText(MainActivity.this, "Dragging",
+//                        // Toast.LENGTH_SHORT).show();
+//                        System.out.println("Draagging");
+//                    }
+//
+//                    @Override
+//                    public void onMarkerDragEnd(Marker marker) {
+//                        position = marker.getPosition(); //
+//                        Toast.makeText(
+//                                AddEventActivity.this,
+//                                "Lat " + position.latitude + " "
+//                                        + "Long " + position.longitude,
+//                                Toast.LENGTH_LONG).show();
+//                        lat = position.latitude;
+//                        lng = position.longitude;
+//                    }
+//                });
 
             }
         });
@@ -390,16 +388,16 @@ public class AddEventActivity extends AppCompatActivity implements
     public void updateLabelData() {
         String myFormat = "dd/MM/yyyy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, new Locale("pt","BR"));
-
         editTextData.setText(sdf.format(myCalendar.getTime()));
     }
+
     public void updateLabelHora() {
         String myFormat = "HH:mm"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, new Locale("pt","BR"));
-
-        hour_x = myCalendar.getTime().getHours();
-        minute_x = myCalendar.getTime().getMinutes();
+//        hour_x = myCalendar.getTime().getHours();
+//        minute_x = myCalendar.getTime().getMinutes();
         editTextHora.setText(sdf.format(myCalendar.getTime()));
+
     }
 
     public void showProgressBar(boolean exibir){
@@ -412,6 +410,8 @@ public class AddEventActivity extends AppCompatActivity implements
         super.onActivityResult(requestCode,resultCode,data);
         if (requestCode == 1 && resultCode == Activity.RESULT_OK && data != null){
             localImagemSelecionada = data.getData();
+            assert localImagemSelecionada != null;
+            tvCaminho.setText(localImagemSelecionada.getPath());
         }
     }
 
@@ -464,20 +464,21 @@ public class AddEventActivity extends AppCompatActivity implements
 
     public void addEvento() {
         //todo add event
+
         eventos = new Eventos();
-        enviarFoto();
+        String keyEvent = RandomKey.randomAlphaNumeric(20);
         eventos.setData((Data.dateToString(year_x, month_x, day_x)));
         eventos.setHorario(Hora.hourToString(hour_x, minute_x));
         eventos.setTipoEvento(tipoevento);
+        eventos.setEventId(keyEvent);
         if (lat == null && lng == null) {
             lat = latitude;
             lng = longitude;
         }
         eventos.setLat(lat);
         eventos.setLon(lng);
-        //eventos.setEventId(RandomKey.randomAlphaNumeric(10));
-        Log.i("Debug: ",linkDownload.toString());
-        eventos.setImgDownload(linkDownload.toString());
+        Log.i("Debug: ",linkDownload);
+        eventos.setImgDownload(linkDownload);
 
         if (local != null) {
             eventos.setLocal(local);
@@ -500,15 +501,15 @@ public class AddEventActivity extends AppCompatActivity implements
         eventos.setIdUsuario(preferencias.getId());
         database = DAO.getFireBase();
         database.child("events")
-                .push()
+                .child(keyEvent)
                 .setValue(eventos);// cria a referencia com base : events/push/evento.class
         database.child("usuarios")
                 .child(Base64Custom.codificarBase64(preferencias.getEmail()))
                 .child("user_events")
-                .push()
+                .child(keyEvent)
                 .setValue(eventos);// insere o evento dentro da conta do usuário
         Log.i("Debug: ",database.getRef().toString());
-
+        marker = null;
 
         Toast.makeText(AddEventActivity.this,"Adicionado!",Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(AddEventActivity.this,MainActivity.class);
@@ -532,13 +533,13 @@ public class AddEventActivity extends AppCompatActivity implements
                 .child("events")
                 .child(idUsuario)
                 .child(RandomKey.randomAlphaNumeric(10))// Sempre usar 10 caracteres
-                .child("image_eevent.png");
+                .child("image_event.png");
         linkDownload = storageReference.toString();
         try {
             Bitmap imagem = MediaStore.Images.Media.getBitmap(getContentResolver(),localImagemSelecionada);
             // comprimir no formato png
             ByteArrayOutputStream stream =  new ByteArrayOutputStream();
-            imagem.compress(Bitmap.CompressFormat.PNG,60,stream);
+            imagem.compress(Bitmap.CompressFormat.JPEG,40,stream);
             byte[] byteData = stream.toByteArray();
             UploadTask uploadTask = storageReference.putBytes(byteData);
 
@@ -548,11 +549,10 @@ public class AddEventActivity extends AppCompatActivity implements
                 public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                     progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
                     showProgressBar(true);
-                    //YourAsyncTask asyncTask = new YourAsyncTask();
-                    //asyncTask.onPreExecute();
-//                        pd = new ProgressDialog(AddEventActivity.this);
-//                        pd.setMessage("Carregando");
-//                        pd.show();
+                    pd = new ProgressDialog(AddEventActivity.this);
+                    pd.setCancelable(false);
+                    pd.setMessage("Carregando");
+                    pd.show();
                     mProgressBar.setProgress((int)progress);
                     System.out.println("Upload is " + progress + "% done");
                 }
@@ -565,13 +565,19 @@ public class AddEventActivity extends AppCompatActivity implements
                 @Override
                 public void onFailure(@NonNull Exception exception) {
                     exception.printStackTrace();
-                    // pd.dismiss();
+                    pd.dismiss();
                     Toast.makeText(AddEventActivity.this,"Falha ao carregar a imagem",Toast.LENGTH_SHORT).show();
                 }
             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    // pd.dismiss();
+                    pd.dismiss();
+                    addEvento();
+                }
+            }).addOnCanceledListener(new OnCanceledListener() {
+                @Override
+                public void onCanceled() {
+                    pd.dismiss();
                 }
             });
 
@@ -580,35 +586,4 @@ public class AddEventActivity extends AppCompatActivity implements
         }
     }
 
-    private class YourAsyncTask extends AsyncTask<Void, Void, Void> {
-
-        ProgressDialog dialog = new ProgressDialog(AddEventActivity.this);
-
-        @Override
-        protected void onPreExecute() {
-            //set message of the dialog
-            dialog.setMessage("Loading...");
-            dialog.setMax(100);
-            //show dialog
-            dialog.show();
-            super.onPreExecute();
-        }
-
-        protected Void doInBackground(Void... args) {
-            // do background work here
-            dialog.setProgress((int)progress);
-            return null;
-        }
-
-        protected void onPostExecute(Void result) {
-            // do UI work here
-            if(dialog != null && dialog.isShowing()){
-                dialog.dismiss();
-            }
-            if (dialog.getProgress() == 100){
-                dialog.dismiss();
-            }
-
-        }
-    }
 }

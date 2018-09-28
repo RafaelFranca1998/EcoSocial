@@ -33,10 +33,11 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  */
 public class MainFragment extends Fragment {
-    private ListView listView;
     private Context context;
     private String FINAL_TAG_EVENTOS = "events";
+
     private List<Eventos> listEventos;
+    private ListView listView;
     private AdapterListView adapterListView;
 
     private ValueEventListener valueEventListener;

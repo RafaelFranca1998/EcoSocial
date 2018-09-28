@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_horizontal"
     android:orientation="vertical"
     tools:context=".activity.AddEventActivity">
 
@@ -15,6 +16,8 @@
         android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         android:layout_marginBottom="8dp"
         android:orientation="vertical">
 
@@ -46,7 +49,6 @@
                         android:id="@+id/textView4"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
                         android:layout_marginTop="10dp"
                         android:layout_weight="1"
                         android:text="Identifique a Ação"
@@ -66,9 +68,8 @@
                         android:id="@+id/radioGroup"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginStart="10dp"
                         android:layout_marginTop="15dp"
+                        android:layout_marginEnd="10dp"
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -94,16 +95,6 @@
 
                     </RadioGroup>
 
-                    <Switch
-                        android:id="@+id/switch_sem_limite_tempo"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_weight="1"
-                        android:checked="false"
-                        android:text="Sem limite de tempo"
-                        android:textColor="@color/Preto"
-                        app:layout_constraintTop_toBottomOf="@+id/editText_outro" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -124,7 +115,6 @@
                             android:id="@+id/tv_horario"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
                             android:layout_weight="2"
                             android:text="Horario"
                             android:textColor="@color/Preto" />
@@ -179,13 +169,15 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Escolher imagem:" />
+                        android:text="Escolher imagem:"
+                        android:textColor="@color/Preto" />
 
                     <TextView
                         android:id="@+id/txt_caminho_imagem"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="20"
+                        android:padding="5dp"
                         android:text="Nenhuma" />
 
                     <Button
@@ -218,8 +210,8 @@
                         android:id="@+id/mapView2"
                         android:layout_width="match_parent"
                         android:layout_height="150dp"
-                        android:layout_marginEnd="5dp"
-                        android:layout_marginStart="5dp" />
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -232,9 +224,6 @@
         android:id="@+id/button_adicionar_evento"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="33dp"
-        android:layout_marginEnd="148dp"
-        android:layout_marginStart="148dp"
         android:background="@color/primary_dark"
         android:text="Adicionar"
         android:textColor="@color/Branco" />

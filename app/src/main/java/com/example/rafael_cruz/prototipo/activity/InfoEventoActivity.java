@@ -7,9 +7,13 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.example.rafael_cruz.prototipo.R;
 import com.example.rafael_cruz.prototipo.config.DAO;
 import com.example.rafael_cruz.prototipo.model.Eventos;
@@ -44,6 +48,8 @@ public class InfoEventoActivity extends AppCompatActivity {
     private ImageView imgFotoEvento;
     //----------------------------------------------------------------------------------------------
     private Toolbar toolbar;
+    ProgressBar progressBar;
+
 
 
 
@@ -58,6 +64,7 @@ public class InfoEventoActivity extends AppCompatActivity {
         txtDescricao= findViewById(R.id.txt_info_descricao);
         txtTelefone= findViewById(R.id.txt_info_telefone);
         imgFotoEvento = findViewById(R.id.image_info);
+        progressBar = findViewById(R.id.progressBar_info);
         //------------------------------------------------------------------------------------------
         Bundle extra = getIntent().getExtras();
 
@@ -90,9 +97,28 @@ public class InfoEventoActivity extends AppCompatActivity {
     private void getImg(){
         storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(url);
         storageReference.toString();
-        Glide.with(this).using(new FirebaseImageLoader())
-                .load(storageReference)
-                .into(imgFotoEvento);
+        if (!this.isFinishing ()) {
+            if (imgFotoEvento == null){
+                imgFotoEvento.setVisibility(View.GONE);
+                progressBar.setVisibility(View.VISIBLE);
+            }
+            Glide.with(this).using(new FirebaseImageLoader())
+                    .load(storageReference)
+                    .listener(new RequestListener<StorageReference, GlideDrawable>() {
+                @Override
+                public boolean onException(Exception e, StorageReference model, Target<GlideDrawable> target, boolean isFirstResource) {
+                    progressBar.setVisibility(View.GONE);
+                    imgFotoEvento.setVisibility(View.VISIBLE);
+                    return false; // important to return false so the error placeholder can be placed
+                }
+
+                @Override
+                public boolean onResourceReady(GlideDrawable resource, StorageReference model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                    progressBar.setVisibility(View.GONE);
+                    imgFotoEvento.setVisibility(View.VISIBLE);
+                    return false;
+                }}).into(imgFotoEvento);
+        }
     }
 
     /**
@@ -105,9 +131,11 @@ public class InfoEventoActivity extends AppCompatActivity {
                 for (DataSnapshot data: dataSnapshot.getChildren()) {
                     Log.i("Debug:",dataSnapshot.getChildren().toString());
                     Log.i("Debug:",keyEvent);
-                    String key2 = data.getKey().toString();
+                    String key2 = data.getKey();
+                    assert key2 != null;
                     if ( key2.equals(keyEvent) ) {
                         eventos = data.getValue(Eventos.class);
+                        assert eventos != null;
                         txtDescricao.setText(eventos.getDescricao());
                         txtEndereco.setText(eventos.getLocal());
                         keyUsuario = eventos.getIdUsuario();

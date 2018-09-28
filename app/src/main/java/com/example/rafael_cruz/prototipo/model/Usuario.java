@@ -1,7 +1,7 @@
 package com.example.rafael_cruz.prototipo.model;
 
 public class Usuario {
-    String nome,sobreNome, telefone, email,senha,id;
+    String nome,sobreNome, telefone, email,senha,id,linkImgAccount;
 
     public String getId() {
         return id;
@@ -49,5 +49,13 @@ public class Usuario {
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public String getLinkImgAccount() {
+        return linkImgAccount;
+    }
+
+    public void setLinkImgAccount(String linkImgAccount) {
+        this.linkImgAccount = linkImgAccount;
     }
 }
