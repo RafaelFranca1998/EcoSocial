@@ -61,13 +61,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private static final int REQUEST_READ_CONTACTS = 0;
 
     /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
@@ -90,12 +83,12 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         setContentView(R.layout.activity_login);
         // setupActionBar();
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailView =  findViewById(R.id.email);
         btCadastro =  findViewById(R.id.bt_cadastre_se);
 
         populateAutoComplete();
 
-        mPasswordView = (EditText) findViewById(R.id.password);
+        mPasswordView =  findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -108,14 +101,13 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         });
 
         //      todo tentativa de login
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailSignInButton = findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 usuario = new Usuario();
                 usuario.setEmail(mEmailView.getText().toString());
                 usuario.setSenha(mPasswordView.getText().toString());
-                // validarLogin();
                 attemptLogin();
 
             }
@@ -236,12 +228,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() > 4;
     }
 
@@ -306,7 +296,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             emails.add(cursor.getString(ProfileQuery.ADDRESS));
             cursor.moveToNext();
         }
-
         addEmailsToAutoComplete(emails);
     }
 
@@ -347,68 +336,58 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         UserLoginTask(String email, String password) {
             mEmail = email;
             mPassword = password;
-            auntenticacao = DAO.getFirebaseAutenticacao();
-            auntenticacao.signInWithEmailAndPassword(
-                    mEmail,
-                    mPassword
-            ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-
-                    identificadorUsuarioLogado = Base64Custom.codificarBase64(usuario.getEmail());
-
-                    firebase = DAO.getFireBase()
-                            .child("usuarios")
-                            .child(identificadorUsuarioLogado);
-                    valueEventListenerUsuario = new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            Usuario usuarioRecuperado = dataSnapshot.getValue( Usuario.class );
-                            Preferencias preferencias = new Preferencias(LoginActivity.this);
-                            preferencias.salvarDados( usuarioRecuperado.getNome(),usuarioRecuperado.getSobreNome(),usuarioRecuperado.getEmail(),usuarioRecuperado.getSenha(),usuarioRecuperado.getId() );
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    };
-
-                    firebase.addListenerForSingleValueEvent(valueEventListenerUsuario);
-
-
-                    if (task.isSuccessful()) {
-                        Toast.makeText(LoginActivity.this,"Sucesso ao fazer login!",Toast.LENGTH_SHORT).show();
-                        abrirTelaPrincipal();
-                    } else {
-                        Toast.makeText(LoginActivity.this,"Erro ao fazer login!",Toast.LENGTH_SHORT).show();
-
-                    }
-                }
-            });
         }
-
+        boolean isSucessfull;
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
+                auntenticacao = DAO.getFirebaseAutenticacao();
+                auntenticacao.signInWithEmailAndPassword(
+                        mEmail,
+                        mPassword
+                ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+
+                        identificadorUsuarioLogado = Base64Custom.codificarBase64(usuario.getEmail());
+
+                        firebase = DAO.getFireBase()
+                                .child("usuarios")
+                                .child(identificadorUsuarioLogado);
+                        valueEventListenerUsuario = new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                Usuario usuarioRecuperado = dataSnapshot.getValue( Usuario.class );
+                                Preferencias preferencias = new Preferencias(LoginActivity.this);
+                                preferencias.salvarDados
+                                        ( usuarioRecuperado.getNome(),usuarioRecuperado.getSobreNome(), usuarioRecuperado.getEmail(),
+                                                usuarioRecuperado.getSenha(),usuarioRecuperado.getId(), usuarioRecuperado.getLinkImgAccount() );
+
+                            }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+
+
+                        };
+
+                        firebase.addListenerForSingleValueEvent(valueEventListenerUsuario);
+
+                        if (task.isSuccessful()) {
+                            Toast.makeText(LoginActivity.this,"Sucesso ao fazer login!",Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(LoginActivity.this,"Erro ao fazer login!",Toast.LENGTH_SHORT).show();
+                        }
+                        isSucessfull  = task.isSuccessful();
+                    }
+                });
+                return true;
+            } catch (Exception e) {
                 return false;
             }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
             // TODO: register the new account here.
-            return true;
         }
 
         @Override
@@ -418,6 +397,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
             if (success) {
                 finish();
+                abrirTelaPrincipal();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

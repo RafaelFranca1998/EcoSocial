@@ -6,4 +6,9 @@
         android:orderInCategory="101"
         android:title="@string/action_about"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_item_share"
+        android:title="Compartilhar"
+        app:actionProviderClass="android.support.v7.widget.ShareActionProvider"
+        app:showAsAction="never" />
 </menu>

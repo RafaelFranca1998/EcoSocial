@@ -1,11 +1,14 @@
 package com.example.rafael_cruz.prototipo.activity;
 
+import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -16,6 +19,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.rafael_cruz.prototipo.R;
 import com.example.rafael_cruz.prototipo.config.DAO;
+import com.example.rafael_cruz.prototipo.fragments.MapsFragment;
 import com.example.rafael_cruz.prototipo.model.Eventos;
 import com.example.rafael_cruz.prototipo.model.Usuario;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
@@ -47,10 +51,11 @@ public class InfoEventoActivity extends AppCompatActivity {
     //----------------------------------------------------------------------------------------------
     private ImageView imgFotoEvento;
     //----------------------------------------------------------------------------------------------
+    private Button btSeeOnMap;
+    //----------------------------------------------------------------------------------------------
     private Toolbar toolbar;
     ProgressBar progressBar;
-
-
+    public static boolean isMap;
 
 
     @Override
@@ -58,13 +63,14 @@ public class InfoEventoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info_evento);
         //------------------------------------------------------------------------------------------
-        txtNome = findViewById(R.id.txt_info_nome);
-        txtEmail= findViewById(R.id.txt_info_email);
-        txtEndereco= findViewById(R.id.txt_info_endereco);
-        txtDescricao= findViewById(R.id.txt_info_descricao);
-        txtTelefone= findViewById(R.id.txt_info_telefone);
-        imgFotoEvento = findViewById(R.id.image_info);
-        progressBar = findViewById(R.id.progressBar_info);
+        txtNome         = findViewById(R.id.txt_info_nome);
+        txtEmail        = findViewById(R.id.txt_info_email);
+        txtEndereco     = findViewById(R.id.txt_info_endereco);
+        txtDescricao    = findViewById(R.id.txt_info_descricao);
+        txtTelefone     = findViewById(R.id.txt_info_telefone);
+        btSeeOnMap      = findViewById(R.id.see_on_map);
+        imgFotoEvento   = findViewById(R.id.image_info);
+        progressBar     = findViewById(R.id.progressBar_info);
         //------------------------------------------------------------------------------------------
         Bundle extra = getIntent().getExtras();
 
@@ -75,6 +81,9 @@ public class InfoEventoActivity extends AppCompatActivity {
         //---------------------------------CONFIGURA TOOLBAR----------------------------------------
         toolbar = findViewById(R.id.toolbar2);
         setSupportActionBar(toolbar);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            toolbar.setTitleTextColor(getColor(R.color.Branco));
+        }
         toolbar.setTitle("Informações");
         toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp));
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -90,13 +99,49 @@ public class InfoEventoActivity extends AppCompatActivity {
         usuario =  new Usuario();
 
         getDatabase1();
+        //------------------------------------------------------------------------------------------
+        btSeeOnMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(InfoEventoActivity.this,MapsActivity.class);
+                intent.putExtra("lat",eventos.getLat());
+                intent.putExtra("lon",eventos.getLon());
+                startActivity(intent);
+            }
+        });
     }
+
+    @Override
+    public void onBackPressed() {
+        if (isMap){
+            isMap = false;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        MapsFragment fragment= new MapsFragment();
+                        android.support.v4.app.FragmentTransaction fragmentTransaction =
+                                getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction.replace(R.id.fragment_container, fragment);
+                        fragmentTransaction.commit();
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    } finally {
+                        finish();
+                    }
+                }
+            }).start();
+        }else{
+            super.onBackPressed();
+        }
+
+    }
+
     /**
-     * Metodo para baixar a imagem referente ao evento.
+     * Method to download the image related to the event.
      */
     private void getImg(){
         storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(url);
-        storageReference.toString();
         if (!this.isFinishing ()) {
             if (imgFotoEvento == null){
                 imgFotoEvento.setVisibility(View.GONE);
@@ -122,7 +167,7 @@ public class InfoEventoActivity extends AppCompatActivity {
     }
 
     /**
-     * Obtem os dados do evento do banco de dados.
+     * Gets the event data from the database.
      */
     private void getDatabase1(){
         databaseReference.addValueEventListener(new ValueEventListener() {
@@ -152,7 +197,7 @@ public class InfoEventoActivity extends AppCompatActivity {
     }
 
     /**
-     * Obtem os dados do usuario.
+     * Gets the user's data.
      */
     private void getDatabase2(){
         databaseReference2 = DAO.getFireBase().child("usuarios");
@@ -160,7 +205,7 @@ public class InfoEventoActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot data:dataSnapshot.getChildren()){
-                    String key3 = data.getKey().toString();
+                    String key3 = data.getKey();
                     if (key3.equals(keyUsuario)){
                         usuario = data.getValue(Usuario.class);
                         txtNome.setText(usuario.getNome()+" "+usuario.getSobreNome());

@@ -47,9 +47,10 @@
         android:layout_marginTop="47dp"
         android:background="@drawable/background_text"
         android:clickable="true"
-        android:text="Fazer login"
+        android:text="@string/fazer_login"
         android:textAlignment="center"
         android:textColor="@color/Branco"
-        android:textSize="22sp" />
+        android:textSize="22sp"
+        android:focusable="true" />
 
 </RelativeLayout>

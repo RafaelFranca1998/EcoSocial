@@ -1,7 +1,6 @@
 package com.example.rafael_cruz.prototipo.activity;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -33,60 +32,56 @@ import com.google.firebase.database.DatabaseReference;
 
 public class CadastroActivity extends AppCompatActivity {
 
-    private EditText editTextTelefone;
-    private EditText editTextNome;
-    private EditText editTextSobrenome;
+    private EditText editTextPhone;
+    private EditText editTextName;
+    private EditText editTextLastName;
     private EditText editTextEmail;
-    private EditText editTextSenha;
-    private Button buttoncadastrar;
+    private EditText editTextPwd;
+    private Button buttonRegister;
     private DatabaseReference database;
     private FirebaseAuth auth;
+    private int PERMISSION_GRANTED = PackageManager.PERMISSION_GRANTED;
 
 
-    private Usuario usuario;
+    private Usuario user;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro);
-        //--------------------------CAMPOS DO FORM-----------------------------------------------------------------------------------------
-        editTextTelefone = findViewById(R.id.editText_telefone);
+        //-----------------------------------CAMPOS DO FORM-----------------------------------------
+        editTextPhone = findViewById(R.id.editText_telefone);
         editTextEmail = findViewById(R.id.editText_email);
-        editTextNome = findViewById(R.id.editText_nome);
-        editTextSobrenome = findViewById(R.id.editText_sobrenome);
-        editTextSenha = findViewById(R.id.editText_senha);
-        buttoncadastrar = findViewById(R.id.bt_cadastrar);
-        //-----------------------------------MASCARA DE TEXTO--------------------------------------------------------------------------
+        editTextName = findViewById(R.id.editText_nome);
+        editTextLastName = findViewById(R.id.editText_sobrenome);
+        editTextPwd = findViewById(R.id.editText_senha);
+        buttonRegister = findViewById(R.id.bt_cadastrar);
+        //-----------------------------------MASCARA DE TEXTO---------------------------------------
         SimpleMaskFormatter simpleMasktelefone = new SimpleMaskFormatter("NN(NN)NNNNN-NNNN");
-        MaskTextWatcher maskTel = new MaskTextWatcher(editTextTelefone, simpleMasktelefone);
-        editTextTelefone.addTextChangedListener(maskTel);
+        MaskTextWatcher maskTel = new MaskTextWatcher(editTextPhone, simpleMasktelefone);
+        editTextPhone.addTextChangedListener(maskTel);
 
-        buttoncadastrar.setOnClickListener(new View.OnClickListener() {
+        buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                usuario = new Usuario();
-                usuario.setNome(editTextNome.getText().toString());
-                usuario.setSobreNome(editTextSobrenome.getText().toString());
-                usuario.setEmail(editTextEmail.getText().toString());
-                usuario.setSenha(editTextSenha.getText().toString());
-                cadastrar();
+                user = new Usuario();
+                user.setNome(editTextName.getText().toString());
+                user.setSobreNome(editTextLastName.getText().toString());
+                user.setEmail(editTextEmail.getText().toString());
+                user.setSenha(editTextPwd.getText().toString());
+                register();
             }
         });
 
-        //Obtem numero do user
+        //get number from user
         TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-        String numeroDoTelefone = "";
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_NUMBERS) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        String phoneNumber = "";
+        if (ActivityCompat.checkSelfPermission
+                (this, Manifest.permission.READ_SMS) != PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission
+                        (this, Manifest.permission.READ_PHONE_NUMBERS) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(CadastroActivity.this,
                     new String[]{Manifest.permission.READ_SMS},
                     0);
@@ -98,62 +93,63 @@ public class CadastroActivity extends AppCompatActivity {
                     0);
             return;
         }
-        //TODO me ajuda ai, não tá indo
-        numeroDoTelefone = tm.getLine1Number();
-//-----------------------------------------------------------------------------------------------------------
-        editTextTelefone.setText(numeroDoTelefone);
+        phoneNumber = tm.getLine1Number();
+        if (!phoneNumber.equals("")) {
+            editTextPhone.setText(phoneNumber);
+            editTextPhone.setEnabled(false);
+        }
+        //------------------------------------------------------------------------------------------
     }
 
-    /**Adiciona o usuário ao banco de dados e cia login
-     *
+    /**
+     *Add user to Datastorage and register.
      */
-    private void cadastrar(){
+    private void register(){
         database = DAO.getFireBase();
         auth = DAO.getFirebaseAutenticacao();
-        usuario =  new Usuario();
-        usuario.setEmail(editTextEmail.getText().toString());
-        usuario.setNome(editTextNome.getText().toString());
-        usuario.setSobreNome(editTextSobrenome.getText().toString());
-        usuario.setTelefone(editTextTelefone.getText().toString());
-        usuario.setLinkImgAccount("gs://ecossocial-2c0dc.appspot.com/images/account/"+Base64Custom.codificarBase64(usuario.getEmail())+"/image_account.png");
-        auth.createUserWithEmailAndPassword(editTextEmail.getText().toString(),editTextSenha.getText().toString())
+        user =  new Usuario();
+        user.setEmail(editTextEmail.getText().toString());
+        user.setNome(editTextName.getText().toString());
+        user.setSobreNome(editTextLastName.getText().toString());
+        user.setTelefone(editTextPhone.getText().toString());
+        final String linkImg = "gs://ecossocial-2c0dc.appspot.com/images/account/"+Base64Custom.codificarBase64(user.getEmail())+"/image_account.png";
+        user.setLinkImgAccount(linkImg);
+        auth.createUserWithEmailAndPassword(editTextEmail.getText().toString(), editTextPwd.getText().toString())
                 .addOnCompleteListener(CadastroActivity.this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()){
-                    Toast.makeText(CadastroActivity.this,"Sucesso ao cadastrar usuário",Toast.LENGTH_LONG);
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()){
+                            Toast.makeText(CadastroActivity.this,"Sucesso ao register usuário",Toast.LENGTH_LONG);
 
-                    String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmail());
-                    FirebaseUser user =  task.getResult().getUser();
-                    usuario.setId( identificadorUsuario );
-                    database.child("usuarios").child(identificadorUsuario).setValue(usuario);
-
-                    abrirUsuarioLogado();
-
-                    Preferencias preferencias = new Preferencias(CadastroActivity.this);
-                    preferencias.salvarDados(usuario.getNome(),usuario.getSobreNome(),usuario.getEmail(),
-                            editTextSenha.getText().toString(),identificadorUsuario);
-                }else {
-                    String erroExcecao = "";
-                    try {
-                        throw task.getException();
-                    } catch (FirebaseAuthWeakPasswordException e) {
-                        erroExcecao = "Digite uma senha mais forte, contendo letras e numeros";
-                    } catch (FirebaseAuthInvalidCredentialsException e) {
-                        erroExcecao = "O emais digitado é inválido, digite outro email";
-                    } catch (FirebaseAuthUserCollisionException e ){
-                        erroExcecao = "já existe outra conta com este e-mail";
-                    }catch (Exception e){
-                        erroExcecao = "Erro a o efetuar cadastro";
-                        e.printStackTrace();
+                            String identificadorUsuario = Base64Custom.codificarBase64(user.getEmail());
+                            FirebaseUser user =  task.getResult().getUser();
+                            CadastroActivity.this.user.setId( identificadorUsuario );
+                            database.child("usuarios").child(identificadorUsuario).setValue(CadastroActivity.this.user);
+                            openLoggedUser();
+                            Preferencias preferencias = new Preferencias(CadastroActivity.this);
+                            preferencias.salvarDados(CadastroActivity.this.user.getNome(), CadastroActivity.this.user.getSobreNome(), CadastroActivity.this.user.getEmail(),
+                                    editTextPwd.getText().toString(),identificadorUsuario,linkImg);
+                        }else {
+                            String errorException = "";
+                            try {
+                                throw task.getException();
+                            } catch (FirebaseAuthWeakPasswordException e) {
+                                errorException = "Digite uma senha mais forte, contendo letras e numeros";
+                            } catch (FirebaseAuthInvalidCredentialsException e) {
+                                errorException = "O emais digitado é inválido, digite outro email";
+                            } catch (FirebaseAuthUserCollisionException e ){
+                                errorException = "já existe outra conta com este e-mail";
+                            }catch (Exception e){
+                                errorException = "Erro a o efetuar cadastro";
+                                e.printStackTrace();
+                            }
+                            Toast.makeText(CadastroActivity.this,errorException,Toast.LENGTH_LONG).show();
+                        }
                     }
-                    Toast.makeText(CadastroActivity.this,erroExcecao,Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+                });
     }
 
-    public void abrirUsuarioLogado(){
+    public void openLoggedUser(){
         Intent intent =  new Intent(this,MainActivity.class);
         startActivity(intent);
         finish();

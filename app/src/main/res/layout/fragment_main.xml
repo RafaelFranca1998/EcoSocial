@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:visibility="visible"
     tools:context=".fragments.MainFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:orientation="vertical"
-        android:visibility="visible">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -24,11 +25,9 @@
                 android:id="@+id/titulo_main"
                 android:layout_width="match_parent"
                 android:layout_height="37dp"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
                 android:layout_marginTop="30dp"
                 android:background="@drawable/roundborder"
-                android:text="Faça uma boa Ação"
+                android:text="@string/fa_a_uma_boa_a_o"
                 android:textAllCaps="false"
                 android:textColor="@color/Branco"
                 android:textSize="18sp"
@@ -38,29 +37,21 @@
                 android:id="@+id/logo_main"
                 android:layout_width="83dp"
                 android:layout_height="83dp"
-                android:layout_alignParentEnd="true"
+                android:layout_alignStart="@+id/titulo_main"
                 android:layout_alignParentTop="true"
-                android:layout_marginEnd="24dp"
-                android:src="@drawable/logo_prototipo_mateus"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
+                android:layout_marginStart="273dp"
+                android:layout_marginTop="0dp"
+                android:contentDescription="@string/logo"
+                android:src="@drawable/logo_prototipo_mateus" />
+
         </RelativeLayout>
 
-        <ListView
-            android:id="@+id/list"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview_main"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:background="@color/Branco"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/titulo_main" />
+            android:layout_height="match_parent" />
+
     </LinearLayout>
 
-</LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

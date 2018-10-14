@@ -6,15 +6,15 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_principal"
-            android:icon="@drawable/icons8_rss_50"
+            android:icon="@drawable/ic_rss_feed"
             android:title="@string/principal" />
         <item
             android:id="@+id/nav_eventos"
-            android:icon="@drawable/icons8_map_marker_24"
+            android:icon="@drawable/ic_map"
             android:title="@string/eventos" />
         <item
             android:id="@+id/nav_marcar_evento"
-            android:icon="@drawable/ic_map_marker_plus"
+            android:icon="@drawable/ic_add_location_black_24dp"
             android:title="@string/string_marcar_evento" />
         <item
             android:id="@+id/nav_account"

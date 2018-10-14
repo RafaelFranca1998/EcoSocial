@@ -11,6 +11,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="115dp"
+        android:contentDescription="@string/logo"
         android:src="@drawable/logo_prototipo_mateus" />
 
     <TextView
@@ -21,7 +22,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="244dp"
         android:fontFamily="monospace"
-        android:text="EcoSocial"
+        android:text="@string/ecosocial"
         android:textColor="@color/Branco"
         android:textSize="30sp" />
 

@@ -2,6 +2,7 @@ package com.example.rafael_cruz.prototipo.fragments;
 
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.rafael_cruz.prototipo.R;
+import com.example.rafael_cruz.prototipo.activity.InfoEventoActivity;
 import com.example.rafael_cruz.prototipo.activity.MainActivity;
 import com.example.rafael_cruz.prototipo.config.DAO;
 import com.example.rafael_cruz.prototipo.config.ItemEvento;
@@ -48,6 +50,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     MapView mMapView;
     private static GoogleMap googleMap;
     List<Marker> markerList;
+    List<Eventos> eventosList;
     LocationManager locationManager;
     Location mLocation;
     Double latitude, longitude;
@@ -59,7 +62,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         MainActivity.isInFragment = true;
 
-        mMapView = (MapView) rootView.findViewById(R.id.mapView);
+        mMapView = rootView.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
 
         mMapView.onResume(); // needed to get the map to display immediately
@@ -80,6 +83,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
 
                 markerList = new ArrayList<>();
+                eventosList = new ArrayList<>();
                 DatabaseReference databaseReference = DAO.getFireBase().child("events");
                 final ValueEventListener valueEventListener = new ValueEventListener() {
                     @Override
@@ -96,6 +100,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                             LatLng latLng = new LatLng(eventos.getLat(), eventos.getLon());
                             Marker marker = googleMap.addMarker(new MarkerOptions().position(latLng)
                                     .title(eventos.getTipoEvento()).snippet(eventos.getLocal()).icon(bitmapDescriptor));
+                            eventos.setMarkerId(marker.getId());
+                            eventosList.add(eventos);
                             markerList.add(marker);
                         }
                     }
@@ -106,6 +112,24 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     }
                 };
                 databaseReference.addValueEventListener(valueEventListener);
+
+                googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        for (int i = 0; i < eventosList.size();i++) {
+                            String id = eventosList.get(i).getMarkerId();
+                            String markerId = marker.getId();
+                            if (markerId.equals(id)) {
+                                Eventos eventos = eventosList.get(i);
+                                InfoEventoActivity.isMap = true;
+                                Intent intent =  new Intent(getActivity(), InfoEventoActivity.class);
+                                intent.putExtra("eventos", eventos.getEventId());
+                                startActivity(intent);
+                            }
+                        }
+                        return false;
+                    }
+                });
 
                 locationManager = MainActivity.locationManager;
                 if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
@@ -176,6 +200,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         } else {
 
         }
+
 
 
             mMap.setMyLocationEnabled(true);

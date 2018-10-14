@@ -7,19 +7,27 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,8 +40,13 @@ import com.example.rafael_cruz.prototipo.config.DAO;
 import com.example.rafael_cruz.prototipo.config.Preferencias;
 import com.example.rafael_cruz.prototipo.fragments.AboutFragment;
 import com.example.rafael_cruz.prototipo.fragments.MainFragment;
-import com.example.rafael_cruz.prototipo.fragments.MapsFragment;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.StorageReference;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, LocationListener {
@@ -48,6 +61,7 @@ public class MainActivity extends AppCompatActivity
     public static boolean isInFragment = false;
     //atributo da classe.
     private AlertDialog alerta;
+    private StorageReference islandRef;
 
     @Override
     protected void onStart() {
@@ -84,13 +98,6 @@ public class MainActivity extends AppCompatActivity
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         Location location = locationManager.getLastKnownLocation(provider);
@@ -117,6 +124,9 @@ public class MainActivity extends AppCompatActivity
             txtLogin.setText("Sair");
             txtEmail.setText(preferencias.getEmail());
             txtNome.setText(preferencias.getNome()+" "+preferencias.getSobrenome());
+//            Uri uri;
+//            uri = Uri.parse( preferencias.getLinkImg());
+//            baixarImagem(uri);
             txtLogin.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -152,62 +162,58 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (isFinsihActivity && !isInFragment){
-            abrirDialogSair();
+            openDialogExit();
         } else if (isInFragment){
             super.onBackPressed();
         }
     }
 
-    private void abrirDialogSair() {
-        //Cria o gerador do AlertDialog
+    /**
+     * open a dialog to confirm the exit.
+     */
+    private void openDialogExit() {
+        //create builder for AlertDialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        //define o titulo
+        //set title
         builder.setTitle("Sair?");
-        //define a mensagem
+        //set message
         builder.setMessage("Realmente quer sair?");
-        //define um botão como positivo
+        //set positive button
         builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
                 Toast.makeText(MainActivity.this, "positivo=" + arg1, Toast.LENGTH_SHORT).show();
                 finishAffinity();
             }
         });
-        //define um botão como negativo.
+        //set negative button
         builder.setNegativeButton("Não", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
                 Toast.makeText(MainActivity.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
             }
         });
-        //cria o AlertDialog
+        //create AlertDialog
         alerta = builder.create();
-        //Exibe
+        //show
         alerta.show();
     }
 
-    private void abrirDialogLogar() {
-        //Cria o gerador do AlertDialog
+    private void openDialogLogIn() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        //define o titulo
         builder.setTitle("Para Adicionar um caso é preciso estar logado");
-        //define a mensagem
         builder.setMessage("Fazer login?");
-        //define um botão como positivo
         builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-                Toast.makeText(MainActivity.this, "positivo=" + arg1, Toast.LENGTH_SHORT).show();
+                Log.i("Dialog login: ","Sim");
                 Intent intent =  new Intent(MainActivity.this,LoginActivity.class);
                 startActivity(intent);
             }
         });
-        //define um botão como negativo.
         builder.setNegativeButton("Não", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-                Toast.makeText(MainActivity.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
+                Log.i("Dialog login: ","Não");
             }
         });
-        //cria o AlertDialog
         alerta = builder.create();
-        //Exibe
         alerta.show();
     }
 
@@ -217,15 +223,12 @@ public class MainActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
+    private ShareActionProvider miShareAction;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_about){
             AboutFragment fragment = new AboutFragment();
             android.support.v4.app.FragmentTransaction fragmentTransaction =
@@ -234,11 +237,12 @@ public class MainActivity extends AppCompatActivity
             fragmentTransaction.commit();
             setToolbarTitle("Sobre o Ecosocial");
             return true;
+        } else if (id == R.id.menu_item_share){
+            miShareAction = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -253,12 +257,8 @@ public class MainActivity extends AppCompatActivity
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    MapsFragment fragment= new MapsFragment();
-                    setToolbarTitle("Eventos");
-                    android.support.v4.app.FragmentTransaction fragmentTransaction =
-                            getSupportFragmentManager().beginTransaction();
-                    fragmentTransaction.replace(R.id.fragment_container, fragment);
-                    fragmentTransaction.commit();
+                    Intent intent = new Intent(MainActivity.this,MapsActivity.class);
+                    startActivity(intent);
                 }
             }).start();
 
@@ -272,7 +272,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 }).start();
             } else {
-                abrirDialogLogar();
+                openDialogLogIn();
             }
         } else if (id == R.id.nav_account){
             if (verificarUsuarioLogado()){
@@ -286,7 +286,15 @@ public class MainActivity extends AppCompatActivity
         }else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
-
+            String text = "Vamos fazer uma boa ação? Baixe o EcoSocial! Http://www.ecosocial.com/download/";
+            Uri pictureUri = Uri.parse(Environment.getExternalStorageDirectory().getAbsolutePath() + "/user_photo.png");
+            Intent shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, text);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, pictureUri);
+            shareIntent.setType("image/*");
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(shareIntent, "Compartilhar App"));
         }
 
         DrawerLayout drawer;
@@ -295,9 +303,14 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+    }
 
     /**
-     * Usado para modificar o titulo na barra de titulo.
+     * modify the title from toolbar.
      * @param title
      *
      */
@@ -349,6 +362,48 @@ public class MainActivity extends AppCompatActivity
     public void onProviderDisabled(String provider) {
         Toast.makeText(this, "Disabled provider " + provider,
                 Toast.LENGTH_SHORT).show();
+    }
+
+    public void baixarImagem(Uri imagemUri){
+        islandRef = DAO.getFirebaseStorage().child(imagemUri.toString());
+        final long ONE_MEGABYTE = 1024 * 1024;
+        islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                writeImg(bitmap);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.e("Erro: ",exception.getMessage());
+            }
+        });
+    }
+
+    public  void writeImg(Bitmap bmp){
+        try {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+
+            byte[] bytes = stream.toByteArray();
+            //this creates a png file in internal folder
+            //the directory is like : ......data/sketches/my_sketch_437657436.png
+//            File mFileTemp = new File(getFilesDir() + File.separator
+//                    + "sketches"
+//                    , "my_sketch_"
+//                    + System.currentTimeMillis() + ".png");
+//            mFileTemp.getParentFile().mkdirs();
+
+
+            String fileName = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/user_photo.png");
+            FileOutputStream fos = new FileOutputStream(fileName);
+            fos.write(bytes);
+            fos.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

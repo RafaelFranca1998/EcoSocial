@@ -18,6 +18,7 @@ public class Preferencias {
     private String CHAVE_EMAIL      = "email";
     private String CHAVE_SENHA      = "senha";
     private String CHAVE_IDENTIFICADOR      = "identificador";
+    private String CHAVE_IMAGEM_LINK      = "linkImg";
 
 
     public Preferencias(Context contextoParametro) {
@@ -26,12 +27,13 @@ public class Preferencias {
         editor      = preferences.edit();
     }
 
-    public void salvarDados(String nome,String sobrenome, String email, String senha,String id){
+    public void salvarDados(String nome,String sobrenome, String email, String senha,String id,String linkImg){
         editor.putString(CHAVE_NOME,nome        );
         editor.putString(CHAVE_SOBRENOME,sobrenome);
         editor.putString(CHAVE_EMAIL,email);
         editor.putString(CHAVE_SENHA,senha      );
         editor.putString(CHAVE_IDENTIFICADOR, id);
+        editor.putString(CHAVE_IMAGEM_LINK,linkImg);
         editor.commit();
     }
 
@@ -54,6 +56,10 @@ public class Preferencias {
     }
     public String getSobrenome(){
         return  preferences.getString(CHAVE_SOBRENOME,null);
+    }
+    public String getLinkImg(){
+        return  preferences.getString(CHAVE_IMAGEM_LINK,null);
+
     }
 
 

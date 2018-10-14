@@ -9,10 +9,17 @@ public class Eventos {
 
     private String data,horario;
     static int dataCriacao,iconeRid;
-    private String tipoEvento,local,descricao,idUsuario,eventId, autorEmail;
+    private String tipoEvento,local,descricao,idUsuario,eventId, autorEmail, nome,imgDownload,markerId;
     private double lat,lon;
-    private String imgDownload;
 
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
     public String getData() {
         return data;
@@ -91,14 +98,14 @@ public class Eventos {
        this("","","","","","","",-13.003257,-38.523767,-1);
         data = "";
         horario= "";
-        tipoEvento = "";
         local = "";
-        descricao = "";
         idUsuario = "";
         eventId = "";
         lat = -13.003257;
         lon = -38.523767;
         iconeRid = 0;
+        nome = "";
+        markerId = "";
     }
 
     public Eventos(String data, String horario, String tipoEvento, String local, String descricao, String idUsuario, String eventId, double lat, double lon,int iconeRid) {
@@ -144,5 +151,13 @@ public class Eventos {
 
     public void setEventId(String eventId) {
         this.eventId = eventId;
+    }
+
+    public void setMarkerId(String id) {
+        markerId = id;
+    }
+
+    public String getMarkerId() {
+        return markerId;
     }
 }

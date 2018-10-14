@@ -59,7 +59,6 @@ public class SelectOnMapFragment extends Fragment implements OnMapReadyCallback 
                 googleMap = mMap;
 
                 // For showing a move to my location button
-                populateMap();
                 // For dropping a marker at a point on the Map
                 LatLng salvador = new LatLng(-12.999998, -38.493746);
                 googleMap.addMarker(new MarkerOptions().position(salvador).title("Coleta de Lixo")
@@ -135,13 +134,5 @@ public class SelectOnMapFragment extends Fragment implements OnMapReadyCallback 
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
-    private void populateMap(){
-        final LatLng MELBOURNE = new LatLng(-37.813, 144.962);
-        Marker melbourne = googleMap.addMarker(new MarkerOptions()
-                .position(MELBOURNE)
-                .title("Melbourne")
-                .snippet("Population: 4,137,400")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.logo_prototipo_mateus)));
-    }
 
 }

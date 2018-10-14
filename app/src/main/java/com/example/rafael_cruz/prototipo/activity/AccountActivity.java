@@ -21,7 +21,6 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 import com.example.rafael_cruz.prototipo.R;
 import com.example.rafael_cruz.prototipo.config.AdapterListViewAccount;
@@ -30,7 +29,6 @@ import com.example.rafael_cruz.prototipo.config.CircleTransform;
 import com.example.rafael_cruz.prototipo.config.DAO;
 import com.example.rafael_cruz.prototipo.config.Preferencias;
 import com.example.rafael_cruz.prototipo.model.Eventos;
-import com.example.rafael_cruz.prototipo.model.Usuario;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -51,14 +49,14 @@ import java.util.List;
 
 public class AccountActivity extends AppCompatActivity {
     private ImageView imgAccount;
-    private Button btTrocarFt;
+    private Button btChangeImg;
     private TextView emailUser;
     private TextView nameUser;
 
     private String url;
-    private String idUsuario;
+    private String idUser;
     private String linkDownload;
-    private Uri localImagemSelecionada;
+    private Uri pathLocalImg;
     private double progress;
     private ProgressBar progressBar;
 
@@ -66,13 +64,10 @@ public class AccountActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
     public StorageReference storageReference;
     private ValueEventListener valueEventListener;
-    BitmapImageViewTarget target;
 
     private List<Eventos> listEventos;
     private ListView listView;
     private AdapterListViewAccount adapterListView;
-
-    Usuario usuario;
 
     @Override
     protected void onStart() {
@@ -93,52 +88,55 @@ public class AccountActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account);
-
-
+        //------------------------------------------------------------------------------------------
         listView = findViewById(R.id.account_lv);
         imgAccount = findViewById(R.id.img_account);
-        btTrocarFt = findViewById(R.id.bt_trocar_ft);
+        btChangeImg = findViewById(R.id.bt_trocar_ft);
         progressBar = findViewById(R.id.progressBar2);
         emailUser = findViewById(R.id.txt_account_emailuser);
         nameUser = findViewById(R.id.txt_account_username);
-
-
+        //------------------------------------------------------------------------------------------
         Preferencias preferencias = new Preferencias(AccountActivity.this);
-        idUsuario = Base64Custom.codificarBase64(preferencias.getEmail());
-        url = "gs://ecossocial-2c0dc.appspot.com/images/account/"+idUsuario+"/image_account.png";
-        databaseReference = DAO.getFireBase().child("usuarios").child(idUsuario).child("user_events");
-
+        idUser = Base64Custom.codificarBase64(preferencias.getEmail());
+        url = "gs://ecossocial-2c0dc.appspot.com/images/account/"+ idUser +"/image_account.png";
+        databaseReference = DAO.getFireBase().child("usuarios").child(idUser).child("user_events");
+        //------------------------------------------------------------------------------------------
         emailUser.setText(preferencias.getEmail());
         nameUser.setText(preferencias.getNome()+" "+preferencias.getSobrenome());
 
-        storageReference = DAO.getFirebaseStorage().child("images").child("account").child(idUsuario).child("image_account.png");
-
+        storageReference = DAO.getFirebaseStorage()
+                .child("images")
+                .child("account")
+                .child(idUser)
+                .child("image_account.png");
 
         listEventos =  new ArrayList<>();
         getListEvent();
         adapterListView =  new AdapterListViewAccount(AccountActivity.this,listEventos);
         listView.setAdapter(adapterListView);
 
-        btTrocarFt.setOnClickListener(new View.OnClickListener() {
+        btChangeImg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                compartilharFoto();
+                shareImg();
             }
         });
         updateImgAccount();
-
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == Activity.RESULT_OK && data != null){
-            localImagemSelecionada = data.getData();
-            enviarFoto();
+            pathLocalImg = data.getData();
+            sendImg();
         }
     }
 
-    public void compartilharFoto(){
+    /**
+     * Method to obtain the path for images.
+     */
+    public void shareImg(){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -148,6 +146,9 @@ public class AccountActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Method to update the user image.
+     */
     private void updateImgAccount(){
         StorageReference reference = FirebaseStorage.getInstance().getReferenceFromUrl(url);
         if (!this.isFinishing ()) {
@@ -174,8 +175,7 @@ public class AccountActivity extends AppCompatActivity {
                             progressBar.setVisibility(View.GONE);
                             return false;
                         }
-                    })
-                    .into(imgAccount);
+                    }).into(imgAccount);
         }
     }
 
@@ -205,14 +205,14 @@ public class AccountActivity extends AppCompatActivity {
     }
 
 
-    private void enviarFoto(){
+    private void sendImg(){
         storageReference = DAO.getFirebaseStorage()
                 .child("images")
                 .child("account")
-                .child(idUsuario)
+                .child(idUser)
                 .child("image_account.png");
         try {
-            Bitmap imagem = MediaStore.Images.Media.getBitmap((AccountActivity.this).getContentResolver(),localImagemSelecionada);
+            Bitmap imagem = MediaStore.Images.Media.getBitmap((AccountActivity.this).getContentResolver(), pathLocalImg);
             // comprimir no formato jpeg
             ByteArrayOutputStream stream =  new ByteArrayOutputStream();
             imagem.compress(Bitmap.CompressFormat.JPEG,60,stream);

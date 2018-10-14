@@ -27,6 +27,8 @@ public class AboutFragment extends Fragment {
     private ProgressDialog progressDialog;
     private MediaController mediaControls;
 
+
+
     public AboutFragment() {
         // Required empty public constructor
     }

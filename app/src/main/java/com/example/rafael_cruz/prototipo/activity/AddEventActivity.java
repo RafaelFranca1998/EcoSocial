@@ -28,6 +28,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -71,35 +72,38 @@ public class AddEventActivity extends AppCompatActivity implements
         OnMapReadyCallback, LocationListener {
 
     //------------------------------------------MAP-------------------------------------------------
-    private int REQUEST_LOCATION;
-    private static MapView mMapView;
+    private int             REQUEST_LOCATION;
+    private static MapView  mMapView;
     private static GoogleMap mGoogleMap;
     private static Location mLocation;
-    private static Double latitude,longitude, lat, lng;
-    private static LatLng position;
+    private static Double   latitude,longitude, lat, lng;
+    private static LatLng   position;
     private LocationManager locationManager;
-    private GoogleMap.OnCameraIdleListener onCameraIdleListener;
-    private String provider;
-    private static LatLng salvador;
-    private static LatLng latLng;
-    private List<Address> addresses;
-    private Geocoder geocoder;
-    private static Marker marker;
+    private String          provider;
+    private static LatLng   salvador;
+    private static LatLng   latLng;
+    private List<Address>   addresses;
+    private Geocoder        geocoder;
+    private static Marker   marker;
     //-------------------------------------------VIEWS----------------------------------------------
-    private Eventos eventos;
-    private Button buttonAvancar;
-    private Button btCompartilhar;
-    private TextView tvCaminho;
-    private RadioGroup radioGroup;
-    private String tipoevento;
-    private String idUsuario;
+    private Eventos     eventos;
+    private Button      buttonAvancar;
+    private Button      btCompartilhar;
+    private TextView    tvCaminho;
+    private TextView    tvData;
+    private RadioGroup  radioGroup;
+    private String      tipoevento;
+    private String      idUsuario;
     String country;
     String locality;
+    private boolean         isClicked;
     private static EditText editTextData;
     private static EditText editTextHora;
-    private static int year_x, month_x, day_x, hour_x, minute_x;
-    private static String local;
-    private String linkDownload;
+    private static EditText editTextNome;
+    private EditText        editTextDescricao;
+    private static int      year_x, month_x, day_x, hour_x, minute_x;
+    private static String   local;
+    private String          linkDownload;
     private DatabaseReference database;
     private StorageReference storageReference;
     //------------------------------------------DIALOG----------------------------------------------
@@ -110,38 +114,50 @@ public class AddEventActivity extends AppCompatActivity implements
     private DatePickerDialog.OnDateSetListener date;
     private TimePickerDialog.OnTimeSetListener time;
     //----------------------------------------------------------------------------------------------
-    private static Uri localImagemSelecionada;
-    FragmentManager fragmentManager;
-    Toolbar toolbar;
-    ProgressBar mProgressBar;
+    private static Uri      pathSelectedImg;
+    public FragmentManager  fragmentManager;
+    private ProgressBar     mProgressBar;
+    private LinearLayout    llHora;
+    private LinearLayout    llNome;
+    private LinearLayout    llDataEHora;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_event);
-
-        toolbar = findViewById(R.id.toolbar2);
+        //------------------------------------------------------------------------------------------
+        Toolbar toolbar = findViewById(R.id.toolbar2);
         mProgressBar = findViewById(R.id.progressBar);
         setSupportActionBar(toolbar);
-
+        radioGroup = findViewById(R.id.radioGroup);
+        isClicked = false;
+        fragmentManager = getSupportFragmentManager();
 
         geocoder = new Geocoder(AddEventActivity.this, Locale.getDefault());
 
         Preferencias preferencias =  new Preferencias(this);
         idUsuario = preferencias.getId();
-
+        //-----------------------------------LAYOUTS------------------------------------------------
+        llHora = findViewById(R.id.ll_hora);
+        llNome = findViewById(R.id.ll_nome);
+        llDataEHora = findViewById(R.id.ll_hora_e_data);
+        //-----------------------------------TEXTVIEWS----------------------------------------------
         tvCaminho = findViewById(R.id.txt_caminho_imagem);
-        btCompartilhar = findViewById(R.id.bt_upload);
-        radioGroup = findViewById(R.id.radioGroup);
+        tvData = findViewById(R.id.tv_data);
+        //-----------------------------------BOTÕES-------------------------------------------------
         buttonAvancar = findViewById(R.id.button_adicionar_evento);
+        btCompartilhar = findViewById(R.id.bt_upload);
+        //-----------------------------------EDITTEXT-----------------------------------------------
         editTextData = findViewById(R.id.edit_text_data_2);
         editTextHora = findViewById(R.id.edit_text_hora);
-        fragmentManager = getSupportFragmentManager();
+        editTextNome = findViewById(R.id.editText_nome);
+        editTextDescricao = findViewById(R.id.txt_detalhes);
         //------------------------------------------------------------------------------------------
         final Calendar calendar = Calendar.getInstance();
         year_x = calendar.get(Calendar.YEAR);
         month_x = calendar.get(Calendar.MONTH);
         day_x = calendar.get(Calendar.DAY_OF_MONTH);
+        //------------------------------------------------------------------------------------------
 
         myCalendar = Calendar.getInstance();
 
@@ -207,11 +223,21 @@ public class AddEventActivity extends AppCompatActivity implements
                 if (checkedId == R.id.radio_button_animal_perdido) {
                     tipoevento = "Animal Perdido";
                     editTextHora.setEnabled(false);
-                    Toast.makeText(AddEventActivity.this, "Animal", Toast.LENGTH_LONG).show();
+                    llNome.setVisibility(View.VISIBLE);
+                    llHora.setVisibility(View.GONE);
+                    tvData.setText("Data do desaparecimento: ");
+                    llDataEHora.setOrientation(LinearLayout.VERTICAL);
+                    isClicked = true;
+                    //Animal
                 } else if (checkedId == R.id.radio_button_coleta_de_lixo) {
-                    tipoevento = "Coleta de lixo";
+                    tipoevento = "Coleta de lixo: ";
+                    llNome.setVisibility(View.GONE);
+                    llHora.setVisibility(View.VISIBLE);
+                    llDataEHora.setOrientation(LinearLayout.HORIZONTAL);
+                    tvData.setText("Data: ");
+                    isClicked = true;
                     editTextHora.setEnabled(true);
-                    Toast.makeText(AddEventActivity.this, "Coleta", Toast.LENGTH_LONG).show();
+                    //Coleta de lixo
                 }
             }
         });
@@ -229,13 +255,6 @@ public class AddEventActivity extends AppCompatActivity implements
                 != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-            // TODO Verificação de permissões
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
             ActivityCompat.requestPermissions(this,
@@ -306,20 +325,16 @@ public class AddEventActivity extends AppCompatActivity implements
                             .newCameraPosition(cameraPosition));
                 }
 
-
-
                 mGoogleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
                     @Override
                     public void onCameraIdle() {
-                        //latLng = mGoogleMap.getCameraPosition().target;
                         geocoder = new Geocoder(AddEventActivity.this);
-
                         try {
                             List<Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
                             if (addressList != null && addressList.size() > 0) {
                                 String locality = addressList.get(0).getAddressLine(0);
                                 String country = addressList.get(0).getCountryName();
-                               // marker.setPosition(latLng);
+                                // marker.setPosition(latLng);
                                 position = marker.getPosition();
                                 lat = position.latitude;
                                 lng = position.longitude;
@@ -342,35 +357,6 @@ public class AddEventActivity extends AppCompatActivity implements
                         marker.setPosition(latLng);
                     }
                 });
-
-//                mGoogleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
-//                    @Override
-//                    public void onMarkerDragStart(Marker marker) {
-//                        // Here your code
-//                        Toast.makeText(AddEventActivity.this, "Dragging Start",
-//                                Toast.LENGTH_SHORT).show();
-//                    }
-//
-//                    @Override
-//                    public void onMarkerDrag(Marker marker) {
-//                        // Toast.makeText(MainActivity.this, "Dragging",
-//                        // Toast.LENGTH_SHORT).show();
-//                        System.out.println("Draagging");
-//                    }
-//
-//                    @Override
-//                    public void onMarkerDragEnd(Marker marker) {
-//                        position = marker.getPosition(); //
-//                        Toast.makeText(
-//                                AddEventActivity.this,
-//                                "Lat " + position.latitude + " "
-//                                        + "Long " + position.longitude,
-//                                Toast.LENGTH_LONG).show();
-//                        lat = position.latitude;
-//                        lng = position.longitude;
-//                    }
-//                });
-
             }
         });
         //------------------------------------------------------------------------------------------
@@ -386,7 +372,7 @@ public class AddEventActivity extends AppCompatActivity implements
     }
 
     public void updateLabelData() {
-        String myFormat = "dd/MM/yyyy"; //In which you need put here
+        String myFormat = "dd/MM/yyyy";
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, new Locale("pt","BR"));
         editTextData.setText(sdf.format(myCalendar.getTime()));
     }
@@ -409,9 +395,9 @@ public class AddEventActivity extends AppCompatActivity implements
         // testa processo de retorno
         super.onActivityResult(requestCode,resultCode,data);
         if (requestCode == 1 && resultCode == Activity.RESULT_OK && data != null){
-            localImagemSelecionada = data.getData();
-            assert localImagemSelecionada != null;
-            tvCaminho.setText(localImagemSelecionada.getPath());
+            pathSelectedImg = data.getData();
+            assert pathSelectedImg != null;
+            tvCaminho.setText(pathSelectedImg.getPath());
         }
     }
 
@@ -462,60 +448,71 @@ public class AddEventActivity extends AppCompatActivity implements
         mGoogleMap = googleMap;
     }
 
+    /**
+     *Method to add events.
+     */
     public void addEvento() {
-        //todo add event
-
-        eventos = new Eventos();
-        String keyEvent = RandomKey.randomAlphaNumeric(20);
-        eventos.setData((Data.dateToString(year_x, month_x, day_x)));
-        eventos.setHorario(Hora.hourToString(hour_x, minute_x));
-        eventos.setTipoEvento(tipoevento);
-        eventos.setEventId(keyEvent);
-        if (lat == null && lng == null) {
-            lat = latitude;
-            lng = longitude;
-        }
-        eventos.setLat(lat);
-        eventos.setLon(lng);
-        Log.i("Debug: ",linkDownload);
-        eventos.setImgDownload(linkDownload);
-
-        if (local != null) {
-            eventos.setLocal(local);
-        }
-
         try {
-            addresses = geocoder.getFromLocation(lat, lng, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-        } catch (IOException e) {
+            eventos = new Eventos();
+            String keyEvent = RandomKey.randomAlphaNumeric(20);
+            eventos.setData((Data.dateToString(year_x, month_x, day_x)));
+            eventos.setHorario(Hora.hourToString(hour_x, minute_x));
+            eventos.setTipoEvento(tipoevento);
+            eventos.setEventId(keyEvent);
+            eventos.setDescricao(editTextDescricao.getText().toString());
+            if (lat == null && lng == null) {
+                lat = latitude;
+                lng = longitude;
+            }
+            eventos.setLat(lat);
+            eventos.setLon(lng);
+            Log.i("Debug: ", linkDownload);
+            eventos.setImgDownload(linkDownload);
+
+            if (local != null) {
+                eventos.setLocal(local);
+            }
+
+            try {
+                addresses = geocoder.getFromLocation(lat, lng, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+            String city = addresses.get(0).getLocality();
+            String state = addresses.get(0).getAdminArea();
+            String country = addresses.get(0).getCountryName();
+            String postalCode = addresses.get(0).getPostalCode();
+            String knownName = addresses.get(0).getFeatureName(); // Only if available else return NULL
+            eventos.setLocal(address);
+            Preferencias preferencias = new Preferencias(AddEventActivity.this);
+            eventos.setNome(editTextNome.getText().toString());
+            eventos.setAutorEmail(Base64Custom.codificarBase64(preferencias.getEmail()));
+            eventos.setIdUsuario(preferencias.getId());
+            database = DAO.getFireBase();
+            database.child("events")
+                    .child(keyEvent)
+                    .setValue(eventos);// cria a referencia com base : events/push/evento.class
+            database.child("usuarios")
+                    .child(Base64Custom.codificarBase64(preferencias.getEmail()))
+                    .child("user_events")
+                    .child(keyEvent)
+                    .setValue(eventos);// insere o evento dentro da conta do usuário
+            Log.i("Debug: ", database.getRef().toString());
+            marker = null;
+        }catch (NullPointerException e){
             e.printStackTrace();
+            Toast.makeText(this,"Preencha todos os Campos."+ e.getMessage(),Toast.LENGTH_LONG).show();
+        } catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(this,"Erro desconhecido "+e.toString(),Toast.LENGTH_LONG);
+        }finally {
+            Toast.makeText(AddEventActivity.this,"Adicionado!",Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(AddEventActivity.this,MainActivity.class);
+            startActivity(intent);
         }
-        String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-        String city = addresses.get(0).getLocality();
-        String state = addresses.get(0).getAdminArea();
-        String country = addresses.get(0).getCountryName();
-        String postalCode = addresses.get(0).getPostalCode();
-        String knownName = addresses.get(0).getFeatureName(); // Only if available else return NULL
-        eventos.setLocal(address);
-        Preferencias preferencias = new Preferencias(AddEventActivity.this);
-        eventos.setAutorEmail(Base64Custom.codificarBase64(preferencias.getEmail()));
-        eventos.setIdUsuario(preferencias.getId());
-        database = DAO.getFireBase();
-        database.child("events")
-                .child(keyEvent)
-                .setValue(eventos);// cria a referencia com base : events/push/evento.class
-        database.child("usuarios")
-                .child(Base64Custom.codificarBase64(preferencias.getEmail()))
-                .child("user_events")
-                .child(keyEvent)
-                .setValue(eventos);// insere o evento dentro da conta do usuário
-        Log.i("Debug: ",database.getRef().toString());
-        marker = null;
 
-        Toast.makeText(AddEventActivity.this,"Adicionado!",Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(AddEventActivity.this,MainActivity.class);
-        startActivity(intent);
     }
-
 
     public void compartilharFoto(){
         new Thread(new Runnable() {
@@ -536,7 +533,9 @@ public class AddEventActivity extends AppCompatActivity implements
                 .child("image_event.png");
         linkDownload = storageReference.toString();
         try {
-            Bitmap imagem = MediaStore.Images.Media.getBitmap(getContentResolver(),localImagemSelecionada);
+            if (!isClicked)throw new Exception();
+            if (editTextData.getText().equals("")) throw new Exception();
+            Bitmap imagem = MediaStore.Images.Media.getBitmap(getContentResolver(), pathSelectedImg);
             // comprimir no formato png
             ByteArrayOutputStream stream =  new ByteArrayOutputStream();
             imagem.compress(Bitmap.CompressFormat.JPEG,40,stream);
@@ -582,8 +581,14 @@ public class AddEventActivity extends AppCompatActivity implements
             });
 
         } catch (IOException e) {
+            Toast.makeText(this,"Erro ao enviar a mensagem! "+ e.getMessage() ,Toast.LENGTH_LONG).show();
             e.printStackTrace();
+        } catch (NullPointerException e){
+            Toast.makeText(this,"É necessário selecionar uma foto! "+e.getMessage(),Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(this,"Erro desconhecido! "+e.getMessage(),Toast.LENGTH_LONG).show();
         }
     }
-
 }

@@ -3,7 +3,7 @@
     <!--<style name="AppTheme" parent="android:Theme.Material">-->
         <!--&lt;!&ndash; theme customizations &ndash;&gt;-->
     <!--</style>-->
-    <style name="AppTheme.NoActionBar">
+    <style name="Theme.AppCompat.Light.DarkActionBar.">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>

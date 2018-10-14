@@ -98,11 +98,11 @@ public class AdapterListView extends BaseAdapter {
         if (itemHolder.imgIcon == null){
             itemHolder.imgIcon.setVisibility(View.GONE);
             itemHolder.progressBar.setVisibility(View.VISIBLE);
-        }
-        StorageReference storageReference =
-                FirebaseStorage.getInstance().getReferenceFromUrl(url);
+            StorageReference storageReference =
+                    FirebaseStorage.getInstance().getReferenceFromUrl(url);
             itemHolder.progressBar.setVisibility(View.VISIBLE);
-            Glide.with(context).using(new FirebaseImageLoader())
+            Glide.with(context)
+                    .using(new FirebaseImageLoader())
                     .load(storageReference)
                     .listener(new RequestListener<StorageReference, GlideDrawable>() {
                         @Override
@@ -119,6 +119,16 @@ public class AdapterListView extends BaseAdapter {
                             return false;
                         }
                     }).into(itemHolder.imgIcon);
+        } else {
+            StorageReference storageReference =
+                FirebaseStorage.getInstance().getReferenceFromUrl(url);
+            Glide.with(context).using(new FirebaseImageLoader())
+                    .load(storageReference)
+                    .into(itemHolder.imgIcon);
+            itemHolder.progressBar.setVisibility(View.VISIBLE);
+            itemHolder.progressBar.setVisibility(View.GONE);
+        }
+
 
         //retorna a view com as informações
         return view;
