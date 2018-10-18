@@ -40,7 +40,7 @@ public class AboutFragment extends Fragment {
         // Inflate the layout for this fragment
          View root =inflater.inflate(R.layout.fragment_about, container, false);
 
-        MainActivity.isFinsihActivity = false;
+        MainActivity.isFinishActivity = false;
         MainActivity.isInFragment = true;
 
         //set the media controller buttons

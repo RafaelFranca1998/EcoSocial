@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
@@ -13,6 +14,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.example.rafael_cruz.prototipo.R;
+
+import java.io.File;
 
 public class SplashScreen extends AppCompatActivity {
     // Timer da splash screen
@@ -33,7 +36,6 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
-
         if (ContextCompat.checkSelfPermission(SplashScreen.this, Manifest.permission.READ_CONTACTS)
                 != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(SplashScreen.this, Manifest.permission.ACCESS_FINE_LOCATION)

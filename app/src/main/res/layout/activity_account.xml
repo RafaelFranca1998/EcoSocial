@@ -29,10 +29,10 @@
                 android:layout_height="200dp"
                 android:visibility="gone" />
 
-            <ImageView
+            <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/img_account"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
                 android:layout_marginTop="10dp"
                 android:contentDescription="@string/img_usuario"
                 android:src="@drawable/ic_account_box" />

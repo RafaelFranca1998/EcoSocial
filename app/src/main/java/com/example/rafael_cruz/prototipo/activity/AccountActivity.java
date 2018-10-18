@@ -3,12 +3,16 @@ package com.example.rafael_cruz.prototipo.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -43,12 +47,16 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class AccountActivity extends AppCompatActivity {
-    private ImageView imgAccount;
+    private CircleImageView imgAccount;
     private Button btChangeImg;
     private TextView emailUser;
     private TextView nameUser;
@@ -101,6 +109,16 @@ public class AccountActivity extends AppCompatActivity {
         url = "gs://ecossocial-2c0dc.appspot.com/images/account/"+ idUser +"/image_account.png";
         databaseReference = DAO.getFireBase().child("usuarios").child(idUser).child("user_events");
         //------------------------------------------------------------------------------------------
+        Toolbar toolbar;
+        toolbar = findViewById(R.id.toolbar2);
+        toolbar.setTitle("Conta");
+        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp));
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         emailUser.setText(preferencias.getEmail());
         nameUser.setText(preferencias.getNome()+" "+preferencias.getSobrenome());
 
@@ -109,7 +127,7 @@ public class AccountActivity extends AppCompatActivity {
                 .child("account")
                 .child(idUser)
                 .child("image_account.png");
-
+        linkDownload = storageReference.getPath();
         listEventos =  new ArrayList<>();
         getListEvent();
         adapterListView =  new AdapterListViewAccount(AccountActivity.this,listEventos);
@@ -121,6 +139,8 @@ public class AccountActivity extends AppCompatActivity {
                 shareImg();
             }
         });
+        //todo update
+        //update2(linkDownload);
         updateImgAccount();
     }
 
@@ -151,32 +171,19 @@ public class AccountActivity extends AppCompatActivity {
      */
     private void updateImgAccount(){
         StorageReference reference = FirebaseStorage.getInstance().getReferenceFromUrl(url);
-        if (!this.isFinishing ()) {
-            progressBar.setVisibility(View.VISIBLE);
-            imgAccount.setVisibility(View.GONE);
-
-
-            Glide.with(AccountActivity.this)
-                    .using(new FirebaseImageLoader())
-                    .load(reference)
-                    .transform(new CircleTransform(this))
-                    .listener(new RequestListener<StorageReference, GlideDrawable>() {
-                        @Override
-                        public boolean onException(Exception e, StorageReference model, Target<GlideDrawable> target, boolean isFirstResource) {
-                            imgAccount.setVisibility(View.VISIBLE);
-                            progressBar.setVisibility(View.GONE);
-                            imgAccount.setImageResource(R.drawable.ic_account_box);
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onResourceReady(GlideDrawable resource, StorageReference model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                            imgAccount.setVisibility(View.VISIBLE);
-                            progressBar.setVisibility(View.GONE);
-                            return false;
-                        }
-                    }).into(imgAccount);
-        }
+        final long ONE_MEGABYTE = 1024 * 1024;
+        reference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                imgAccount.setImageBitmap(bitmap);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.e("Erro: ",exception.getMessage());
+            }
+        });
     }
 
     private void getListEvent(){
@@ -211,52 +218,103 @@ public class AccountActivity extends AppCompatActivity {
                 .child("account")
                 .child(idUser)
                 .child("image_account.png");
-        try {
-            Bitmap imagem = MediaStore.Images.Media.getBitmap((AccountActivity.this).getContentResolver(), pathLocalImg);
-            // comprimir no formato jpeg
-            ByteArrayOutputStream stream =  new ByteArrayOutputStream();
-            imagem.compress(Bitmap.CompressFormat.JPEG,60,stream);
-            byte[] byteData = stream.toByteArray();
-            UploadTask uploadTask = storageReference.putBytes(byteData);
+        storageReference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                try {
+                    Bitmap imagem = MediaStore.Images.Media.getBitmap((AccountActivity.this).getContentResolver(), pathLocalImg);
+                    // comprimir no formato jpeg
+                    ByteArrayOutputStream stream =  new ByteArrayOutputStream();
+                    imagem.compress(Bitmap.CompressFormat.JPEG,60,stream);
+                    byte[] byteData = stream.toByteArray();
+                    UploadTask uploadTask = storageReference.putBytes(byteData);
 
-            // Listen for state changes, errors, and completion of the upload.
-            uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                    progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                    //                   showProgressBar(true);
-                    //YourAsyncTask asyncTask = new YourAsyncTask();
-                    //asyncTask.onPreExecute();
-//                        pd = new ProgressDialog(AddEventActivity.this);
-//                        pd.setMessage("Carregando");
-//                        pd.show();
-//                    mProgressBar.setProgress((int)progress);
-                    System.out.println("Upload is " + progress + "% done");
+                    // Listen for state changes, errors, and completion of the upload.
+                    uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                            System.out.println("Upload is " + progress + "% done");
+                        }
+                    }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                            System.out.println("Upload is paused");
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            exception.printStackTrace();
+                            Toast.makeText(AccountActivity.this,"Falha ao carregar a imagem",Toast.LENGTH_SHORT).show();
+                            //todo update
+                            updateImgAccount();
+                            //update2(linkDownload);
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            //todo update
+                            Toast.makeText(AccountActivity.this,"Imagem carregada!",Toast.LENGTH_SHORT).show();
+                            updateImgAccount();
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
-                    System.out.println("Upload is paused");
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    exception.printStackTrace();
-                    // pd.dismiss();
-                    updateImgAccount();
-                    Toast.makeText(AccountActivity.this,"Falha ao carregar a imagem",Toast.LENGTH_SHORT).show();
-                }
-            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    // pd.dismiss();
-                    updateImgAccount();
-                    Toast.makeText(AccountActivity.this,"Imagem carregada!",Toast.LENGTH_SHORT).show();
-                }
-            });
-        } catch (IOException e) {
+                updateImgAccount();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+    }
+
+    public  void writeImg(Bitmap bmp){
+        try {
+            String file_path = Environment.getExternalStorageDirectory().getAbsolutePath() +
+                    "/Ecosocial/Profile";
+            File dir = new File(file_path);
+            if(!dir.exists())
+                dir.mkdirs();
+            File file = new File(dir, "user_image.png");
+            FileOutputStream fOut = new FileOutputStream(file);
+
+            bmp.compress(Bitmap.CompressFormat.PNG, 85, fOut);
+            fOut.flush();
+            fOut.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        updateImgAccount();
+    }
+
+    public void baixarImagem(Uri imagemUri){
+        StorageReference islandRef = DAO.getFirebaseStorage().child(imagemUri.toString());
+        final long ONE_MEGABYTE = 1024 * 1024;
+        islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                writeImg(bitmap);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.e("Erro: ",exception.getMessage());
+            }
+        });
+    }
+    public void deleteImg(){
+        String dir = Environment.getExternalStorageDirectory().getAbsolutePath() +
+                "/Ecosocial/Profile";
+        File f0 = new File(dir, "user_image.png");
+        boolean d0 = f0.delete();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        imgAccount.setImageBitmap(null);
     }
 }

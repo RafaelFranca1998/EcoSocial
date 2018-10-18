@@ -21,20 +21,18 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.example.rafael_cruz.prototipo.R;
 import com.example.rafael_cruz.prototipo.config.DAO;
 import com.example.rafael_cruz.prototipo.config.Preferencias;
@@ -43,25 +41,32 @@ import com.example.rafael_cruz.prototipo.fragments.MainFragment;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, LocationListener {
     private Toolbar toolbar;
+    private CircleImageView imageLogo;
+    private Bitmap bitmap;
+
     public static LocationManager locationManager;
     public static String provider;
     private FirebaseAuth auntenticacao;
     private NavigationView navigationView;
     //caso estiver na atividade principal
-    public static boolean isFinsihActivity = false;
+    public static boolean isFinishActivity = false;
     //caso estiver em um fragment
     public static boolean isInFragment = false;
     //atributo da classe.
     private AlertDialog alerta;
     private StorageReference islandRef;
+    Uri uri;
 
     @Override
     protected void onStart() {
@@ -105,9 +110,6 @@ public class MainActivity extends AppCompatActivity
         if (location != null) {
             System.out.println("Provider " + provider + " has been selected.");
             onLocationChanged(location);
-        } else {
-            //  latituteField.setText("Location not available");
-            //  longitudeField.setText("Location not available");
         }
         // Obtém a referência da view de cabeçalho
         View headerView = navigationView.getHeaderView(0);
@@ -116,17 +118,16 @@ public class MainActivity extends AppCompatActivity
         TextView txtLogin = headerView.findViewById(R.id.usuario_nome_login);
         TextView txtEmail = headerView.findViewById(R.id.textView_nav_header_email);
         TextView txtNome = headerView.findViewById(R.id.textview_nav_header_nome);
-        ImageView imageLogo = headerView.findViewById(R.id.imageViewLogo);
+        imageLogo = headerView.findViewById(R.id.imageViewLogo);
 
         if (verificarUsuarioLogado()) {
             //TODO Resolvido: não consigo setar o nome do usuario
             Preferencias preferencias = new Preferencias(MainActivity.this);
-            txtLogin.setText("Sair");
+            txtLogin.setText(R.string.exit);
             txtEmail.setText(preferencias.getEmail());
             txtNome.setText(preferencias.getNome()+" "+preferencias.getSobrenome());
-//            Uri uri;
-//            uri = Uri.parse( preferencias.getLinkImg());
-//            baixarImagem(uri);
+            uri = Uri.parse( preferencias.getLinkImg());
+            baixarImagem(uri);
             txtLogin.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -137,7 +138,7 @@ public class MainActivity extends AppCompatActivity
                 }
             });
         } else {
-            txtLogin.setText("Fazer Login");
+            txtLogin.setText(R.string.fazer_login);
             txtLogin.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -161,7 +162,7 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (isFinsihActivity && !isInFragment){
+        } else if (isFinishActivity && !isInFragment){
             openDialogExit();
         } else if (isInFragment){
             super.onBackPressed();
@@ -181,14 +182,14 @@ public class MainActivity extends AppCompatActivity
         //set positive button
         builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-                Toast.makeText(MainActivity.this, "positivo=" + arg1, Toast.LENGTH_SHORT).show();
+             //   Toast.makeText(MainActivity.this, "positivo=" + arg1, Toast.LENGTH_SHORT).show();
                 finishAffinity();
             }
         });
         //set negative button
         builder.setNegativeButton("Não", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-                Toast.makeText(MainActivity.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
+               // Toast.makeText(MainActivity.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
             }
         });
         //create AlertDialog
@@ -223,7 +224,6 @@ public class MainActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
-    private ShareActionProvider miShareAction;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -237,8 +237,6 @@ public class MainActivity extends AppCompatActivity
             fragmentTransaction.commit();
             setToolbarTitle("Sobre o Ecosocial");
             return true;
-        } else if (id == R.id.menu_item_share){
-            miShareAction = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -284,8 +282,6 @@ public class MainActivity extends AppCompatActivity
             }
 
         }else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
             String text = "Vamos fazer uma boa ação? Baixe o EcoSocial! Http://www.ecosocial.com/download/";
             Uri pictureUri = Uri.parse(Environment.getExternalStorageDirectory().getAbsolutePath() + "/user_photo.png");
             Intent shareIntent = new Intent();
@@ -332,6 +328,7 @@ public class MainActivity extends AppCompatActivity
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+        baixarImagem(uri);
         locationManager.requestLocationUpdates(provider, 400, 1, this);
         navigationView.setCheckedItem(R.id.nav_principal);
     }
@@ -365,20 +362,26 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void baixarImagem(Uri imagemUri){
-        islandRef = DAO.getFirebaseStorage().child(imagemUri.toString());
-        final long ONE_MEGABYTE = 1024 * 1024;
-        islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                writeImg(bitmap);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                Log.e("Erro: ",exception.getMessage());
-            }
-        });
+        try {
+            islandRef = FirebaseStorage.getInstance().getReferenceFromUrl(imagemUri.toString());
+            final long ONE_MEGABYTE = 1024 * 1024;
+            islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    imageLogo.setImageBitmap(bitmap);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    Log.e("Erro: ",exception.getMessage());
+                }
+            });
+        }catch (NullPointerException e){
+            e.printStackTrace();
+            imageLogo.setImageResource(R.drawable.logo_prototipo_mateus);
+        }
+
     }
 
     public  void writeImg(Bitmap bmp){
@@ -396,7 +399,7 @@ public class MainActivity extends AppCompatActivity
 //            mFileTemp.getParentFile().mkdirs();
 
 
-            String fileName = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/user_photo.png");
+            String fileName = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/user_photo"+System.currentTimeMillis()+".png");
             FileOutputStream fos = new FileOutputStream(fileName);
             fos.write(bytes);
             fos.close();

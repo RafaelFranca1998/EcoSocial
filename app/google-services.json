@@ -23,6 +23,58 @@
           }
         },
         {
+          "client_id": "447583385381-vka3fuuul9590494f133sgrm3r2h94j0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rafael_cruz.prototipo",
+            "certificate_hash": "bb45d626707845c8f0b0837f67d1f9d4e1494898"
+          }
+        },
+        {
+          "client_id": "447583385381-q31nump2363tclumothplko0qqv6g5c0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoIBoGRG3JdTrm_y2sasGAyBDwjjhTZ34"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "447583385381-q31nump2363tclumothplko0qqv6g5c0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:447583385381:android:f09d3885aa999a19",
+        "android_client_info": {
+          "package_name": "release.ecosocial.com.ecosocial"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "447583385381-2ac8t6upfqnivh2b5leg9sp6sr4d2vqr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "release.ecosocial.com.ecosocial",
+            "certificate_hash": "436acaf5c0070286b3e47ea6eba327cb7cabe20b"
+          }
+        },
+        {
           "client_id": "447583385381-q31nump2363tclumothplko0qqv6g5c0.apps.googleusercontent.com",
           "client_type": 3
         }

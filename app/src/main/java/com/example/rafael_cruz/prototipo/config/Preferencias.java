@@ -2,6 +2,7 @@ package com.example.rafael_cruz.prototipo.config;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.widget.Toast;
 
 import java.util.HashMap;
 
@@ -59,7 +60,21 @@ public class Preferencias {
     }
     public String getLinkImg(){
         return  preferences.getString(CHAVE_IMAGEM_LINK,null);
+    }
 
+    public boolean isComplete(){
+        try {
+            getNome();
+            getEmail();
+            getId();
+            getSobrenome();
+            getId();
+            return true;
+        }catch (NullPointerException e){
+            Toast.makeText(contexto,"Não foi possivel salvar dados",Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+            return false;
+        }
     }
 
 

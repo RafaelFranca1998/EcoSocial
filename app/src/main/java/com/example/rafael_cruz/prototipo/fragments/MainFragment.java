@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,7 +60,7 @@ public class MainFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = rootView.findViewById(R.id.recyclerview_main);
 
-        MainActivity.isFinsihActivity = true;
+        MainActivity.isFinishActivity = true;
         MainActivity.isInFragment = false;
         databaseReference = DAO.getFireBase().child(FINAL_TAG_EVENTOS);
         //--------------------------CONFIGURA ADAPTER-----------------------------------------------

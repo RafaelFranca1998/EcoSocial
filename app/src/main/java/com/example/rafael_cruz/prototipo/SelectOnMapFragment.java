@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
 
 import android.support.v4.app.ActivityCompat;
@@ -17,7 +18,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import com.google.android.gms.location.LocationListener;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -28,7 +29,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class SelectOnMapFragment extends android.support.v4.app.Fragment implements OnMapReadyCallback, LocationListener  {
+public class SelectOnMapFragment extends android.support.v4.app.Fragment implements OnMapReadyCallback, LocationListener {
 
     private Context context;
     private int REQUEST_LOCATION;
@@ -169,6 +170,21 @@ public class SelectOnMapFragment extends android.support.v4.app.Fragment impleme
 
     @Override
     public void onLocationChanged(Location location) {
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
 
     }
 

@@ -150,7 +150,7 @@ public class AddEventActivity extends AppCompatActivity implements
         //-----------------------------------EDITTEXT-----------------------------------------------
         editTextData = findViewById(R.id.edit_text_data_2);
         editTextHora = findViewById(R.id.edit_text_hora);
-        editTextNome = findViewById(R.id.editText_nome);
+        editTextNome = findViewById(R.id.editText_name);
         editTextDescricao = findViewById(R.id.txt_detalhes);
         //------------------------------------------------------------------------------------------
         final Calendar calendar = Calendar.getInstance();

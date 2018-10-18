@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -37,6 +38,7 @@ import com.example.rafael_cruz.prototipo.config.DAO;
 import com.example.rafael_cruz.prototipo.config.Preferencias;
 import com.example.rafael_cruz.prototipo.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -333,11 +335,14 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         private final String mEmail;
         private final String mPassword;
 
+        private Preferencias preferencias;
+
+
         UserLoginTask(String email, String password) {
             mEmail = email;
             mPassword = password;
         }
-        boolean isSucessfull;
+        boolean isSuccessful;
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
@@ -346,45 +351,51 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 auntenticacao.signInWithEmailAndPassword(
                         mEmail,
                         mPassword
-                ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                ).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                     @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-
+                    public void onSuccess(AuthResult authResult) {
                         identificadorUsuarioLogado = Base64Custom.codificarBase64(usuario.getEmail());
-
                         firebase = DAO.getFireBase()
                                 .child("usuarios")
                                 .child(identificadorUsuarioLogado);
                         valueEventListenerUsuario = new ValueEventListener() {
                             @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                Usuario usuarioRecuperado = dataSnapshot.getValue( Usuario.class );
-                                Preferencias preferencias = new Preferencias(LoginActivity.this);
-                                preferencias.salvarDados
-                                        ( usuarioRecuperado.getNome(),usuarioRecuperado.getSobreNome(), usuarioRecuperado.getEmail(),
-                                                usuarioRecuperado.getSenha(),usuarioRecuperado.getId(), usuarioRecuperado.getLinkImgAccount() );
-
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                Usuario usuarioRecuperado = dataSnapshot.getValue(Usuario.class);
+                                preferencias = new Preferencias(LoginActivity.this);
+                                try {
+                                    preferencias.salvarDados
+                                            (usuarioRecuperado.getNome(), usuarioRecuperado.getSobreNome(), usuarioRecuperado.getEmail(),
+                                                    usuarioRecuperado.getSenha(), usuarioRecuperado.getId(), usuarioRecuperado.getLinkImgAccount());
+                                }catch (NullPointerException e){
+                                    Toast.makeText(LoginActivity.this,"Database Error:"+e.getMessage(),Toast.LENGTH_LONG).show();
+                                    Log.e("Database Error: ","Database Error:"+e.getMessage());
+                                }
                             }
+
                             @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                Log.e("DatabaseError", databaseError.getMessage());
                             }
-
-
                         };
 
                         firebase.addListenerForSingleValueEvent(valueEventListenerUsuario);
-
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(LoginActivity.this,"Sucesso ao fazer login!",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Sucesso ao fazer login!", Toast.LENGTH_SHORT).show();
+                            abrirTelaPrincipal();
                         } else {
-                            Toast.makeText(LoginActivity.this,"Erro ao fazer login!",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Erro ao fazer login!", Toast.LENGTH_SHORT).show();
+                            showProgress(false);
                         }
-                        isSucessfull  = task.isSuccessful();
+                        isSuccessful = task.isSuccessful();
                     }
                 });
                 return true;
-            } catch (Exception e) {
+            }catch (Exception e){
                 return false;
             }
             // TODO: register the new account here.
@@ -393,12 +404,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
-            showProgress(false);
+            // showProgress(false);
 
-            if (success) {
-                finish();
-                abrirTelaPrincipal();
-            } else {
+            if (!success) {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
             }
@@ -410,8 +418,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             showProgress(false);
         }
     }
-
-
 
     private void abrirTelaPrincipal(){
         Intent intent =  new Intent(LoginActivity.this,MainActivity.class);

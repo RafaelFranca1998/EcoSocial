@@ -2,8 +2,8 @@
     <string name="app_name">Eco Social</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">IDE: Android Studio</string>
-    <string name="nav_header_subtitle">rafaelfranca2013@hotmail.com</string>
+    <string name="nav_header_title">Ecosocial</string>
+    <string name="nav_header_subtitle"></string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Configurações</string>
     <string name="action_about">Sobre o App...</string>
@@ -117,6 +117,7 @@
     </string>
     <string name="prompt_password">Senha</string>
     <string name="error_incorrect_password">Senha incorreta</string>
+    <string name="error_invalid_phone">Erro telefone inválido</string>
     <string name="telefone_text">Telefone</string>
     <string name="senha_text">Senha</string>
     <string name="e_mail_text">E-mail</string>
@@ -159,4 +160,6 @@
     <string name="trocar_foto">Trocar Foto</string>
     <string name="img_usuario">img_usuario</string>
     <string name="ver_no_mapa">Ver no mapa</string>
+    <string name="exit">Sair</string>
+    <string name="account">Conta</string>
 </resources>

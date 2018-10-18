@@ -8,7 +8,17 @@
     android:orientation="horizontal"
     tools:context=".activity.CadastroActivity">
 
+    <ProgressBar
+        android:id="@+id/register_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_weight="1"
+        android:visibility="gone" />
+
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/register_form"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginStart="20dp"
@@ -41,7 +51,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textView14" />
 
         <EditText
-            android:id="@+id/editText_nome"
+            android:id="@+id/editText_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
@@ -65,10 +75,10 @@
             android:textColor="@color/Branco"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editText_nome" />
+            app:layout_constraintTop_toBottomOf="@+id/editText_name" />
 
         <EditText
-            android:id="@+id/editText_sobrenome"
+            android:id="@+id/editText_lastname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
@@ -92,10 +102,10 @@
             android:textColor="@color/Branco"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editText_sobrenome" />
+            app:layout_constraintTop_toBottomOf="@+id/editText_lastname" />
 
         <EditText
-            android:id="@+id/editText_telefone"
+            android:id="@+id/editText_phone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
@@ -119,7 +129,7 @@
             android:textColor="@color/Branco"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editText_telefone" />
+            app:layout_constraintTop_toBottomOf="@+id/editText_phone" />
 
         <EditText
             android:id="@+id/editText_email"
@@ -149,7 +159,7 @@
             app:layout_constraintTop_toBottomOf="@+id/editText_email" />
 
         <EditText
-            android:id="@+id/editText_senha"
+            android:id="@+id/editText_pwd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
