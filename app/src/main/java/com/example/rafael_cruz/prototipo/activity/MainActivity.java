@@ -54,19 +54,19 @@ public class MainActivity extends AppCompatActivity
     private Toolbar toolbar;
     private CircleImageView imageLogo;
     private Bitmap bitmap;
+    private FirebaseAuth auntenticacao;
+    private NavigationView navigationView;
+    //atributo da classe.
+    private AlertDialog alerta;
+    private StorageReference islandRef;
+    private Uri uri;
 
     public static LocationManager locationManager;
     public static String provider;
-    private FirebaseAuth auntenticacao;
-    private NavigationView navigationView;
     //caso estiver na atividade principal
     public static boolean isFinishActivity = false;
     //caso estiver em um fragment
     public static boolean isInFragment = false;
-    //atributo da classe.
-    private AlertDialog alerta;
-    private StorageReference islandRef;
-    Uri uri;
 
     @Override
     protected void onStart() {
@@ -121,12 +121,15 @@ public class MainActivity extends AppCompatActivity
         imageLogo = headerView.findViewById(R.id.imageViewLogo);
 
         if (verificarUsuarioLogado()) {
-            //TODO Resolvido: não consigo setar o nome do usuario
             Preferencias preferencias = new Preferencias(MainActivity.this);
             txtLogin.setText(R.string.exit);
             txtEmail.setText(preferencias.getEmail());
             txtNome.setText(preferencias.getNome()+" "+preferencias.getSobrenome());
-            uri = Uri.parse( preferencias.getLinkImg());
+            try {
+                uri = Uri.parse(preferencias.getLinkImg());
+            }catch (NullPointerException e){
+                e.printStackTrace();
+            }
             baixarImagem(uri);
             txtLogin.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -149,7 +152,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         //-----------------------------INICIA FRAGMENT------------------------
-        //TODO sempre iniciar por ultimo
         MainFragment fragment = new MainFragment();
         FragmentTransaction fragmentTransaction =
                 getSupportFragmentManager().beginTransaction();
@@ -182,14 +184,14 @@ public class MainActivity extends AppCompatActivity
         //set positive button
         builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-             //   Toast.makeText(MainActivity.this, "positivo=" + arg1, Toast.LENGTH_SHORT).show();
+                //   Toast.makeText(MainActivity.this, "positivo=" + arg1, Toast.LENGTH_SHORT).show();
                 finishAffinity();
             }
         });
         //set negative button
         builder.setNegativeButton("Não", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-               // Toast.makeText(MainActivity.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
+                // Toast.makeText(MainActivity.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
             }
         });
         //create AlertDialog

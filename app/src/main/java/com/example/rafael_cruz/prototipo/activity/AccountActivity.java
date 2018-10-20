@@ -1,6 +1,7 @@
 package com.example.rafael_cruz.prototipo.activity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,24 +17,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
+
 import com.example.rafael_cruz.prototipo.R;
 import com.example.rafael_cruz.prototipo.config.AdapterListViewAccount;
 import com.example.rafael_cruz.prototipo.config.Base64Custom;
-import com.example.rafael_cruz.prototipo.config.CircleTransform;
 import com.example.rafael_cruz.prototipo.config.DAO;
 import com.example.rafael_cruz.prototipo.config.Preferencias;
 import com.example.rafael_cruz.prototipo.model.Eventos;
-import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -66,7 +60,7 @@ public class AccountActivity extends AppCompatActivity {
     private String linkDownload;
     private Uri pathLocalImg;
     private double progress;
-    private ProgressBar progressBar;
+    private ProgressDialog pd;
 
 
     private DatabaseReference databaseReference;
@@ -100,7 +94,6 @@ public class AccountActivity extends AppCompatActivity {
         listView = findViewById(R.id.account_lv);
         imgAccount = findViewById(R.id.img_account);
         btChangeImg = findViewById(R.id.bt_trocar_ft);
-        progressBar = findViewById(R.id.progressBar2);
         emailUser = findViewById(R.id.txt_account_emailuser);
         nameUser = findViewById(R.id.txt_account_username);
         //------------------------------------------------------------------------------------------
@@ -172,15 +165,23 @@ public class AccountActivity extends AppCompatActivity {
     private void updateImgAccount(){
         StorageReference reference = FirebaseStorage.getInstance().getReferenceFromUrl(url);
         final long ONE_MEGABYTE = 1024 * 1024;
+        pd = new ProgressDialog(AccountActivity.this);
+        pd.setCancelable(false);
+        pd.setMessage("Carregando");
+        pd.show();
+        // mProgressBar.setProgress((int)progress);
+        System.out.println("Upload is " + progress + "% done");
         reference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                 imgAccount.setImageBitmap(bitmap);
+                pd.dismiss();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
+                pd.dismiss();
                 Log.e("Erro: ",exception.getMessage());
             }
         });
@@ -228,32 +229,36 @@ public class AccountActivity extends AppCompatActivity {
                     imagem.compress(Bitmap.CompressFormat.JPEG,60,stream);
                     byte[] byteData = stream.toByteArray();
                     UploadTask uploadTask = storageReference.putBytes(byteData);
-
+                    final ProgressDialog pd2 = new ProgressDialog(AccountActivity.this);
                     // Listen for state changes, errors, and completion of the upload.
                     uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                             progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                            pd2.setCancelable(false);
+                            pd2.setProgress((int)progress);
+                            pd2.setMessage("Carregando ("+ (int)progress+"%)");
+                            pd2.show();
                             System.out.println("Upload is " + progress + "% done");
                         }
                     }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
                             System.out.println("Upload is paused");
+                            pd2.dismiss();
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception exception) {
-                            exception.printStackTrace();
                             Toast.makeText(AccountActivity.this,"Falha ao carregar a imagem",Toast.LENGTH_SHORT).show();
-                            //todo update
+                            pd2.dismiss();
                             updateImgAccount();
-                            //update2(linkDownload);
+                            exception.printStackTrace();
                         }
                     }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            //todo update
+                            pd2.dismiss();
                             Toast.makeText(AccountActivity.this,"Imagem carregada!",Toast.LENGTH_SHORT).show();
                             updateImgAccount();
                         }

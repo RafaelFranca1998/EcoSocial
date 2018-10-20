@@ -9,8 +9,6 @@
     <string name="action_about">Sobre o App...</string>
     <string name="buttonPrincipal">Principal</string>
     <string name="buttonEncontros">Encontros</string>
-    <string name="evento1">Evento</string>
-    <string name="localdoEvento">Local: 1?</string>
     <string name="contato">Contatos: 1?</string>
     <string name="vazioText">Ainda Estou Vazio...T.T</string>
 
@@ -90,15 +88,15 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
-    <string name="title_activity_maps">Eventos</string>
-    <string name="eventos_perto">Eventos na sua Área</string>
+    <string name="title_activity_maps">Ocorrências</string>
+    <string name="eventos_perto">Ocorrências na sua Área</string>
     <string name="search_events">Pesquisar Locais</string>
     <string name="todo">TODO</string>
-    <string name="string_marcar_evento">Marcar Evento</string>
+    <string name="string_marcar_evento">Marcar Ocorrência</string>
     <string name="convidar_amigos">Convidar Amigos</string>
     <string name="compartilhar">Compartilhar</string>
     <string name="communicate">Communicate</string>
-    <string name="eventos">Eventos</string>
+    <string name="eventos">Ocorrências</string>
     <string name="principal">Principal</string>
     <string name="icone">icone</string>
     <string name="descricao">Descrição</string>
@@ -140,7 +138,7 @@
     <string name="sobrenome">Sobrenome</string>
     <string name="cadastrar">Cadastrar</string>
     <string name="criar_nova_conta">Criar nova conta</string>
-    <string name="informaces_do_evento">Informações do Evento</string>
+    <string name="informaces_do_evento">Informações da Ocorrência</string>
     <string name="autor">Autor: </string>
     <string name="nome">Nome</string>
     <string name="endere_o">Endereço: </string>
@@ -154,7 +152,7 @@
     <string name="ecosocial">EcoSocial</string>
     <string name="fa_a_uma_boa_a_o">Faça uma boa Ação</string>
     <string name="fazer_login">Fazer login</string>
-    <string name="seus_eventos">Seus eventos</string>
+    <string name="seus_eventos">Suas Ocorrências</string>
     <string name="nome_do_usuario">Nome do Usuario</string>
     <string name="email_do_usuario">Email do usuario</string>
     <string name="trocar_foto">Trocar Foto</string>
@@ -162,4 +160,5 @@
     <string name="ver_no_mapa">Ver no mapa</string>
     <string name="exit">Sair</string>
     <string name="account">Conta</string>
+    <string name="info">Informações</string>
 </resources>

@@ -53,7 +53,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
         //----------------------------------------TOOLBAR-------------------------------------------
         toolbar = findViewById(R.id.toolbar2);
-        toolbar.setTitle("Eventos");
+        toolbar.setTitle(getString(R.string.eventos));
         toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp));
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

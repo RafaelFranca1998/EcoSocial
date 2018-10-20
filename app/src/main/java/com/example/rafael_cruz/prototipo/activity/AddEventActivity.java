@@ -126,9 +126,10 @@ public class AddEventActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_event);
         //------------------------------------------------------------------------------------------
-        Toolbar toolbar = findViewById(R.id.toolbar2);
         mProgressBar = findViewById(R.id.progressBar);
+        Toolbar toolbar = findViewById(R.id.toolbar2);
         setSupportActionBar(toolbar);
+        toolbar.setTitle(getString(R.string.adicionar));
         radioGroup = findViewById(R.id.radioGroup);
         isClicked = false;
         fragmentManager = getSupportFragmentManager();
@@ -242,7 +243,6 @@ public class AddEventActivity extends AppCompatActivity implements
             }
         });
 
-        // todo inicializa o mapa
         mMapView = findViewById(R.id.mapView2);
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume(); // needed to get the map to display immediately

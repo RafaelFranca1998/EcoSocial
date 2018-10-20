@@ -13,7 +13,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -72,9 +74,36 @@ public class CadastroActivity extends AppCompatActivity {
         mProgressView       = findViewById(R.id.register_progress);
         mLoginFormView      = findViewById(R.id.register_form);
         //-----------------------------------MASCARA DE TEXTO---------------------------------------
-        SimpleMaskFormatter simpleMasktelefone = new SimpleMaskFormatter("(NN)NNNNN-NNNN");
-        MaskTextWatcher maskTel = new MaskTextWatcher(editTextPhone, simpleMasktelefone);
+        SimpleMaskFormatter simpleMaskcell = new SimpleMaskFormatter("(NN)NNNNN-NNNN");
+        SimpleMaskFormatter simpleMasktelefone = new SimpleMaskFormatter("(NN)NNNN-NNNN");
+        final MaskTextWatcher maskcell = new MaskTextWatcher(editTextPhone, simpleMaskcell);
+        final MaskTextWatcher maskTel = new MaskTextWatcher(editTextPhone, simpleMasktelefone);
+
         editTextPhone.addTextChangedListener(maskTel);
+
+        editTextPhone.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                editTextPhone.removeTextChangedListener(maskcell);
+                editTextPhone.removeTextChangedListener(maskTel);
+                if (editTextPhone.length() <= 13){
+                    editTextPhone.addTextChangedListener(maskTel);
+                } else if (editTextPhone.length() >= 14){
+                    editTextPhone.addTextChangedListener(maskcell);
+
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,7 +140,7 @@ public class CadastroActivity extends AppCompatActivity {
         phoneNumber = phoneNumber.replaceAll("\\+|55","");
         if (!phoneNumber.equals("")) {
             editTextPhone.setText(phoneNumber);
-            editTextPhone.setEnabled(false);
+            //editTextPhone.setEnabled(false);
         }
         //------------------------------------------------------------------------------------------
     }
@@ -238,7 +267,7 @@ public class CadastroActivity extends AppCompatActivity {
     }
 
     private boolean isPhoneValid(String phone) {
-        return phone.length() > 13;
+        return phone.length() > 12|| phone.length() < 14;
     }
 
     public void openLoggedUser(){

@@ -79,7 +79,7 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginEnd="15dp"
                     android:layout_weight="1"
-                    android:button="@drawable/googleg_standard_color_18"
+                    android:button="@drawable/ic_action_cancel"
                     android:checked="false"
                     android:duplicateParentState="false"
                     android:textAlignment="viewStart" />

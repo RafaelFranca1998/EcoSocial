@@ -84,12 +84,11 @@ public class InfoEventoActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             toolbar.setTitleTextColor(getColor(R.color.Branco));
         }
-        toolbar.setTitle("Informações");
+        toolbar.setTitle(getString(R.string.info));
         toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp));
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //What to do on back clicked
                 finish();
             }
         });
