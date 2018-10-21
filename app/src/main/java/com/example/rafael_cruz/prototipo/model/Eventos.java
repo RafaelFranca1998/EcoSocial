@@ -1,9 +1,10 @@
+/*
+ * Copyright (c) 2018. all rights are reserved to the authors of this project,
+ * unauthorized use of this code in other projects may result in legal complications.
+ */
+
 package com.example.rafael_cruz.prototipo.model;
 
-import android.net.Uri;
-import android.util.Log;
-
-import java.util.Calendar;
 
 public class Eventos {
 

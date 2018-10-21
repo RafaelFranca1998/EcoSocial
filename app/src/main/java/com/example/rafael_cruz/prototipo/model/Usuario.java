@@ -1,7 +1,12 @@
+/*
+ * Copyright (c) 2018. all rights are reserved to the authors of this project,
+ * unauthorized use of this code in other projects may result in legal complications.
+ */
+
 package com.example.rafael_cruz.prototipo.model;
 
 public class Usuario {
-    String nome,sobreNome, telefone, email,senha,id,linkImgAccount;
+    private String nome,sobreNome, telefone, email,senha,id,linkImgAccount;
 
     public String getId() {
         return id;

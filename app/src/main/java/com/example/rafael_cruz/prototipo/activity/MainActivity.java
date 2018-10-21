@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018. all rights are reserved to the authors of this project,
+ * unauthorized use of this code in other projects may result in legal complications.
+ */
+
 package com.example.rafael_cruz.prototipo.activity;
 
 
@@ -30,9 +35,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.example.rafael_cruz.prototipo.R;
 import com.example.rafael_cruz.prototipo.config.DAO;
 import com.example.rafael_cruz.prototipo.config.Preferencias;
@@ -150,8 +153,11 @@ public class MainActivity extends AppCompatActivity
                 }
             });
         }
-
         //-----------------------------INICIA FRAGMENT------------------------
+        startFragment();
+    }
+
+    private void startFragment(){
         MainFragment fragment = new MainFragment();
         FragmentTransaction fragmentTransaction =
                 getSupportFragmentManager().beginTransaction();
@@ -330,6 +336,7 @@ public class MainActivity extends AppCompatActivity
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+        startFragment();
         baixarImagem(uri);
         locationManager.requestLocationUpdates(provider, 400, 1, this);
         navigationView.setCheckedItem(R.id.nav_principal);
@@ -353,14 +360,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onProviderEnabled(String provider) {
-        Toast.makeText(this, "Enabled new provider " + provider,
-                Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Enabled new provider " + provider, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        Toast.makeText(this, "Disabled provider " + provider,
-                Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Disabled provider " + provider, Toast.LENGTH_SHORT).show();
     }
 
     public void baixarImagem(Uri imagemUri){

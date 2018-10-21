@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018. all rights are reserved to the authors of this project,
+ * unauthorized use of this code in other projects may result in legal complications.
+ */
+
 package com.example.rafael_cruz.prototipo.model;
 
 import android.content.Context;
@@ -44,10 +49,7 @@ public class SharedPreferencesEventos {
 
     }
 
-    /**
-     * TODO aqui a gente bota a merda das preferencias do usuario
-     * @return
-     */
+
     public HashMap<String,String> getDadosUsuario(){
         HashMap<String,String> dadosUsuario =  new HashMap<>();
         dadosUsuario.put        (CHAVE_NOME,preferences.getString(CHAVE_NOME,null));

@@ -12,10 +12,9 @@
     <string name="contato">Contatos: 1?</string>
     <string name="vazioText">Ainda Estou Vazio...T.T</string>
 
-    <string name="sobre_o_app">Sobre o App</string>
-    <string name="sobre_o_app2">Este é o protótipo de um App, ou seja a demosntração Gráfica do app</string>
-    <string name="sobre_o_app3">Toda parte gráfica e implementação do
-        App poderá ser Editada posteriormente de acordo com o projeto</string>
+    <string name="sobre_o_app">Ecosocial</string>
+    <string name="sobre_o_app2">Versão 1.0</string>
+    <string name="sobre_o_app3">Este é o protótipo de um App, ou seja a demosntração Gráfica do app Toda parte gráfica e implementação do App poderá ser Editada posteriormente de acordo com o projeto</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_settings">Settings</string>
