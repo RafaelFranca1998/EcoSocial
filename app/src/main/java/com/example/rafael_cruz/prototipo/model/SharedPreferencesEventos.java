@@ -9,10 +9,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 
+
 import java.util.HashMap;
-
 public class SharedPreferencesEventos {
-
     private Context                     contexto;
     private SharedPreferences           preferences;
     private String                      NOME_ARQUIVO    = "evento.eventoPreferencias";

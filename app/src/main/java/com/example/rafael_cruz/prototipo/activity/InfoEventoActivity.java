@@ -6,7 +6,11 @@
 package com.example.rafael_cruz.prototipo.activity;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,6 +21,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
@@ -34,6 +39,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class InfoEventoActivity extends AppCompatActivity {
 
@@ -57,6 +67,7 @@ public class InfoEventoActivity extends AppCompatActivity {
     private ImageView imgFotoEvento;
     //----------------------------------------------------------------------------------------------
     private Button btSeeOnMap;
+    private Button btShare;
     //----------------------------------------------------------------------------------------------
     private Toolbar toolbar;
     ProgressBar progressBar;
@@ -74,6 +85,7 @@ public class InfoEventoActivity extends AppCompatActivity {
         txtDescricao    = findViewById(R.id.txt_info_descricao);
         txtTelefone     = findViewById(R.id.txt_info_telefone);
         btSeeOnMap      = findViewById(R.id.see_on_map);
+        btShare         = findViewById(R.id.button_share);
         imgFotoEvento   = findViewById(R.id.image_info);
         progressBar     = findViewById(R.id.progressBar_info);
         //------------------------------------------------------------------------------------------
@@ -113,6 +125,13 @@ public class InfoEventoActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        btShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shareEvent();
+            }
+        });
     }
 
     @Override
@@ -139,6 +158,47 @@ public class InfoEventoActivity extends AppCompatActivity {
             super.onBackPressed();
         }
 
+    }
+
+    private void shareEvent(){
+
+        String tipo = eventos.getTipoEvento();
+        String text = "";
+        if (tipo.equals(R.string.animal_perdido)){
+            text = "Atenção! Animal perdido em "+eventos.getLocal()+"\n você viu o "+eventos.getNome()+" ?\n ajude-nos.";
+        } else {
+            text = "Atenção! coleta de lixo no dia "
+
+                    +eventos.getData()+"as "+eventos.getHorario()+"\n Endereço "+eventos.getLocal()+"\n ajude-nos a melhorar o mundo.";
+        }
+        imgFotoEvento.buildDrawingCache();
+        Bitmap icon = imgFotoEvento.getDrawingCache();
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        icon.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        File f = new File(Environment.getExternalStorageDirectory() + File.separator + "temporary_file.jpg");
+        try {
+            f.createNewFile();
+            FileOutputStream fo = new FileOutputStream(f);
+            fo.write(bytes.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Uri pictureUri = Uri.parse("file:///sdcard/temporary_file.jpg");
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, text);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, pictureUri);
+        shareIntent.setType("image/*");
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(shareIntent, "Compartilhar App"));
+    }
+
+    private void shareLocation(){
+        String uri = "geo:" + eventos.getLat() + ","
+                +eventos.getLon() + "?q=" + eventos.getLat()
+                + "," + eventos.getLon();
+        startActivity(new Intent(android.content.Intent.ACTION_VIEW,
+                Uri.parse(uri)));
     }
 
     /**

@@ -147,7 +147,7 @@ public class AccountActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == Activity.RESULT_OK && data != null){
             pathLocalImg = data.getData();
-            sendImg();
+            deleteImage();
         }
     }
 
@@ -219,6 +219,55 @@ public class AccountActivity extends AppCompatActivity {
 
 
     private void sendImg(){
+        try {
+            Bitmap imagem = MediaStore.Images.Media.getBitmap((AccountActivity.this).getContentResolver(), pathLocalImg);
+            // comprimir no formato jpeg
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            imagem.compress(Bitmap.CompressFormat.JPEG, 60, stream);
+            byte[] byteData = stream.toByteArray();
+            UploadTask uploadTask = storageReference.putBytes(byteData);
+            final ProgressDialog pd2 = new ProgressDialog(AccountActivity.this);
+            // Listen for state changes, errors, and completion of the upload.
+            uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    pd2.setCancelable(false);
+                    pd2.setProgress((int) progress);
+                    pd2.setMessage("Carregando (" + (int) progress + "%)");
+                    pd2.show();
+                    System.out.println("Upload is " + progress + "% done");
+                }
+            }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                    System.out.println("Upload is paused");
+                    pd2.dismiss();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    Toast.makeText(AccountActivity.this, "Falha ao carregar a imagem", Toast.LENGTH_SHORT).show();
+                    pd2.dismiss();
+                    updateImgAccount();
+                    exception.printStackTrace();
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    pd2.dismiss();
+                    Toast.makeText(AccountActivity.this, "Imagem carregada!", Toast.LENGTH_SHORT).show();
+                    updateImgAccount();
+                }
+            });
+            updateImgAccount();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    private void deleteImage(){
         storageReference = DAO.getFirebaseStorage()
                 .child("images")
                 .child("account")
@@ -228,55 +277,19 @@ public class AccountActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Void aVoid) {
                 try {
-                    Bitmap imagem = MediaStore.Images.Media.getBitmap((AccountActivity.this).getContentResolver(), pathLocalImg);
-                    // comprimir no formato jpeg
-                    ByteArrayOutputStream stream =  new ByteArrayOutputStream();
-                    imagem.compress(Bitmap.CompressFormat.JPEG,60,stream);
-                    byte[] byteData = stream.toByteArray();
-                    UploadTask uploadTask = storageReference.putBytes(byteData);
-                    final ProgressDialog pd2 = new ProgressDialog(AccountActivity.this);
-                    // Listen for state changes, errors, and completion of the upload.
-                    uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                            progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                            pd2.setCancelable(false);
-                            pd2.setProgress((int)progress);
-                            pd2.setMessage("Carregando ("+ (int)progress+"%)");
-                            pd2.show();
-                            System.out.println("Upload is " + progress + "% done");
-                        }
-                    }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
-                            System.out.println("Upload is paused");
-                            pd2.dismiss();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            Toast.makeText(AccountActivity.this,"Falha ao carregar a imagem",Toast.LENGTH_SHORT).show();
-                            pd2.dismiss();
-                            updateImgAccount();
-                            exception.printStackTrace();
-                        }
-                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            pd2.dismiss();
-                            Toast.makeText(AccountActivity.this,"Imagem carregada!",Toast.LENGTH_SHORT).show();
-                            updateImgAccount();
-                        }
-                    });
-                } catch (IOException e) {
+                    sendImg();
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                updateImgAccount();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-
+                try {
+                    sendImg();
+                }catch (Exception e2){
+                    e2.printStackTrace();
+                }
             }
         });
     }

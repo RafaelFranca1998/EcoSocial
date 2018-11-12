@@ -330,31 +330,6 @@ public class AddEventActivity extends AppCompatActivity implements
                             .newCameraPosition(cameraPosition));
                 }
 
-                mGoogleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-                    @Override
-                    public void onCameraIdle() {
-                        geocoder = new Geocoder(AddEventActivity.this);
-                        try {
-                            List<Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-                            if (addressList != null && addressList.size() > 0) {
-                                String locality = addressList.get(0).getAddressLine(0);
-                                String country = addressList.get(0).getCountryName();
-                                // marker.setPosition(latLng);
-                                position = marker.getPosition();
-                                lat = position.latitude;
-                                lng = position.longitude;
-                                if (!locality.isEmpty() && !country.isEmpty()) {
-                                    salvador = new LatLng(latLng.latitude, latLng.longitude);
-                                    Log.i("Local_Debug: " ,locality + "  " + country);
-                                }
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
-
                 mGoogleMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
                     @Override
                     public void onCameraMove() {

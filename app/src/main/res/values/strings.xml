@@ -157,6 +157,9 @@
     <string name="trocar_foto">Trocar Foto</string>
     <string name="img_usuario">img_usuario</string>
     <string name="ver_no_mapa">Ver no mapa</string>
+    <string name="share">Compartilhar</string>
+    <string name="share_on_facebook">Compartilhar
+        no Facebook</string>
     <string name="exit">Sair</string>
     <string name="account">Conta</string>
     <string name="info">Informações</string>

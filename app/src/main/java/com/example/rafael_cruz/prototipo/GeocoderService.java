@@ -6,13 +6,11 @@
 package com.example.rafael_cruz.prototipo;
 
 import android.app.IntentService;
-import android.app.Service;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -102,13 +100,13 @@ public class GeocoderService extends IntentService {
     }
 
     public final class Constants {
-        public static final int SUCCESS_RESULT = 0;
-        public static final int FAILURE_RESULT = 1;
-        public static final String PACKAGE_NAME = "com.example.rafael_cruz.prototipo";
-        public static final String RECEIVER = PACKAGE_NAME + ".RECEIVER";
-        public static final String RESULT_DATA_KEY = PACKAGE_NAME +
+        static final int SUCCESS_RESULT = 0;
+        static final int FAILURE_RESULT = 1;
+        static final String PACKAGE_NAME = "com.example.rafael_cruz.prototipo";
+        static final String RECEIVER = PACKAGE_NAME + ".RECEIVER";
+        static final String RESULT_DATA_KEY = PACKAGE_NAME +
                 ".RESULT_DATA_KEY";
-        public static final String LOCATION_DATA_EXTRA = PACKAGE_NAME +
+        static final String LOCATION_DATA_EXTRA = PACKAGE_NAME +
                 ".LOCATION_DATA_EXTRA";
     }
 }
